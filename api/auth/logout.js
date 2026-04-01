@@ -1,4 +1,4 @@
-const { createSignup } = require("../../lib/auth");
+const { handleLogout } = require("../../lib/auth");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -7,9 +7,9 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    await createSignup(req, res);
+    await handleLogout(req, res);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Unable to create account" });
+    res.status(500).json({ error: "Unable to sign out" });
   }
 };
