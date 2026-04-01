@@ -1,0 +1,12 @@
+{
+  "name": "laundry-web-app",
+  "version": "1.0.0",
+  "description": "Laundry pickup web app with QR registration and printable invoices",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
