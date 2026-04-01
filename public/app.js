@@ -11,12 +11,23 @@ const toast = document.querySelector("#toast");
 const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
 const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
 const loginForm = document.querySelector("#login-form");
+const signupForm = document.querySelector("#signup-form");
 const repeatForm = document.querySelector("#repeat-form");
 const adminLoginForm = document.querySelector("#admin-login-form");
+const authModal = document.querySelector("#auth-modal");
+const authSwitches = Array.from(document.querySelectorAll(".auth-switch"));
+const authPanels = Array.from(document.querySelectorAll(".auth-panel"));
+const openSigninButton = document.querySelector("#open-signin");
+const openSignupButton = document.querySelector("#open-signup");
+const closeAuthButton = document.querySelector("#close-auth");
+const navAuthStatus = document.querySelector("#nav-auth-status");
+const navHubButton = document.querySelector("#nav-hub-button");
+const navSignoutButton = document.querySelector("#nav-signout");
 
 let currentStep = 1;
 let currentCustomer = null;
 let currentAdmin = null;
+let stagedSignupData = null;
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("de-CH", {
@@ -60,6 +71,27 @@ function showToast(message, isError = false) {
   }, 3600);
 }
 
+function scrollToSection(id) {
+  const section = document.querySelector(`#${id}`);
+  if (!section) return;
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function updateNavAuth(customer) {
+  const signedIn = Boolean(customer);
+  navAuthStatus.hidden = !signedIn;
+  navHubButton.hidden = !signedIn;
+  navSignoutButton.hidden = !signedIn;
+  openSigninButton.hidden = signedIn;
+  openSignupButton.hidden = signedIn;
+
+  if (signedIn) {
+    navAuthStatus.textContent = `${customer.firstName} ${customer.lastName}`;
+  } else {
+    navAuthStatus.textContent = "";
+  }
+}
+
 function updateStepper() {
   steps.forEach((step) => {
     step.classList.toggle("active", Number(step.dataset.step) === currentStep);
@@ -74,9 +106,47 @@ function updateStepper() {
   submitButton.hidden = currentStep !== 3;
 }
 
+function setWizardStep(stepNumber) {
+  currentStep = stepNumber;
+  if (currentStep === 3) {
+    renderReview();
+  }
+  updateStepper();
+}
+
 function getFormData(formElement) {
   const formData = new FormData(formElement);
   return Object.fromEntries(formData.entries());
+}
+
+function populateFirstOrderForm(data = {}) {
+  const mappings = {
+    email: data.email,
+    password: data.password,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    address: data.address,
+    postalCode: data.postalCode,
+    city: data.city,
+    phone: data.phone,
+  };
+
+  Object.entries(mappings).forEach(([name, value]) => {
+    const field = form.elements.namedItem(name);
+    if (field && value !== undefined) {
+      field.value = value || "";
+    }
+  });
+}
+
+function startFirstOrderAfterSignup(data = {}) {
+  stagedSignupData = data;
+  form.hidden = false;
+  resultCard.hidden = true;
+  populateFirstOrderForm(data);
+  setActiveTab("register-tab");
+  setWizardStep(2);
+  scrollToSection("experience");
 }
 
 function renderReview() {
@@ -136,22 +206,48 @@ function setActiveTab(targetId) {
   });
 }
 
+function setAuthPanel(targetPanel) {
+  authSwitches.forEach((button) => {
+    button.classList.toggle("active", button.dataset.authPanel === targetPanel);
+  });
+  authPanels.forEach((panel) => {
+    panel.classList.toggle("active", panel.id === targetPanel);
+  });
+}
+
+function openAuthModal(targetPanel) {
+  authModal.hidden = false;
+  document.body.classList.add("modal-open");
+  setAuthPanel(targetPanel);
+}
+
+function closeAuthModal() {
+  authModal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => setActiveTab(button.dataset.tabTarget));
 });
 
+authSwitches.forEach((button) => {
+  button.addEventListener("click", () => setAuthPanel(button.dataset.authPanel));
+});
+
+openSigninButton?.addEventListener("click", () => openAuthModal("signin-panel"));
+openSignupButton?.addEventListener("click", () => openAuthModal("signup-panel"));
+closeAuthButton?.addEventListener("click", closeAuthModal);
+authModal?.addEventListener("click", (event) => {
+  if (event.target.dataset.closeAuth === "true") closeAuthModal();
+});
+
 nextButton.addEventListener("click", () => {
   if (!validateCurrentStep()) return;
-  currentStep += 1;
-  if (currentStep === 3) {
-    renderReview();
-  }
-  updateStepper();
+  setWizardStep(currentStep + 1);
 });
 
 backButton.addEventListener("click", () => {
-  currentStep -= 1;
-  updateStepper();
+  setWizardStep(currentStep - 1);
 });
 
 function renderCustomerHub(customer, orders = []) {
@@ -159,6 +255,7 @@ function renderCustomerHub(customer, orders = []) {
   const ordersBox = document.querySelector("#customer-orders");
 
   if (!customer) {
+    updateNavAuth(null);
     profile.innerHTML = `
       <div class="card-title">
         <p class="eyebrow">Session</p>
@@ -169,6 +266,9 @@ function renderCustomerHub(customer, orders = []) {
     ordersBox.innerHTML = `<div class="empty-state">No customer session loaded yet.</div>`;
     return;
   }
+
+  updateNavAuth(customer);
+  const hasOrders = orders.length > 0;
 
   profile.innerHTML = `
     <div class="card-title">
@@ -182,6 +282,19 @@ function renderCustomerHub(customer, orders = []) {
       <div><small>Phone</small><strong>${customer.phone || "Not provided"}</strong></div>
     </div>
     <div class="qr-inline">${customer.qrSvg}</div>
+    <div class="hub-highlight">
+      ${
+        hasOrders
+          ? `<p class="muted-copy">You are signed in. Review your recent orders below or continue with another pickup.</p>
+             <div class="panel-actions">
+               <a class="button button-primary" href="#experience" id="hub-plan-pickup">Plan another pickup</a>
+             </div>`
+          : `<p class="muted-copy">Your account is ready. Next, finish the remaining pickup steps from the booking section.</p>
+             <div class="panel-actions">
+               <a class="button button-primary" href="#experience" id="hub-first-order">Complete first pickup</a>
+             </div>`
+      }
+    </div>
     <div class="panel-actions">
       <button class="button button-secondary" type="button" id="logout-customer">Sign out</button>
     </div>
@@ -216,8 +329,30 @@ function renderCustomerHub(customer, orders = []) {
   document.querySelector("#logout-customer")?.addEventListener("click", async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     currentCustomer = null;
+    stagedSignupData = null;
     renderCustomerHub(null);
     showToast("Signed out.");
+  });
+
+  document.querySelector("#hub-first-order")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    startFirstOrderAfterSignup(
+      stagedSignupData || {
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        address: customer.address,
+        postalCode: customer.postalCode,
+        city: customer.city,
+        phone: customer.phone,
+      }
+    );
+  });
+
+  document.querySelector("#hub-plan-pickup")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    setActiveTab("repeat-tab");
+    scrollToSection("experience");
   });
 }
 
@@ -243,6 +378,7 @@ function renderBookingResult(response) {
 
   currentCustomer = response.customer;
   loadSession();
+  updateNavAuth(response.customer);
   window.open(response.order.invoiceUrl, "_blank", "noopener,noreferrer");
 }
 
@@ -278,8 +414,19 @@ newOrderButton.addEventListener("click", () => {
   form.reset();
   form.hidden = false;
   resultCard.hidden = true;
-  currentStep = 1;
-  updateStepper();
+  populateFirstOrderForm(
+    stagedSignupData || {
+      email: currentCustomer?.email,
+      firstName: currentCustomer?.firstName,
+      lastName: currentCustomer?.lastName,
+      address: currentCustomer?.address,
+      postalCode: currentCustomer?.postalCode,
+      city: currentCustomer?.city,
+      phone: currentCustomer?.phone,
+    }
+  );
+  setWizardStep(1);
+  scrollToSection("experience");
 });
 
 loginForm.addEventListener("submit", async (event) => {
@@ -300,14 +447,48 @@ loginForm.addEventListener("submit", async (event) => {
     if (!response.ok) throw new Error(result.error || "Unable to sign in");
 
     currentCustomer = result.customer;
+    stagedSignupData = null;
     renderCustomerHub(result.customer, result.orders);
-    setActiveTab("repeat-tab");
-    showToast("Customer session loaded.");
+    closeAuthModal();
+    scrollToSection("customer-hub");
+    showToast("Signed in. Your customer hub is ready.");
   } catch (error) {
     showToast(error.message, true);
   } finally {
     button.disabled = false;
     button.textContent = "Sign in";
+  }
+});
+
+signupForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const button = signupForm.querySelector("button[type='submit']");
+  button.disabled = true;
+  button.textContent = "Creating...";
+
+  try {
+    const payload = getFormData(signupForm);
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.error || "Unable to create account");
+
+    currentCustomer = result.customer;
+    stagedSignupData = payload;
+    renderCustomerHub(result.customer, result.orders);
+    closeAuthModal();
+    startFirstOrderAfterSignup(payload);
+    showToast("Account created. Now complete your first pickup details.");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Create account";
   }
 });
 
@@ -484,12 +665,15 @@ async function loadSession() {
 
     if (!result.authenticated) {
       renderCustomerHub(null);
+      updateNavAuth(null);
+      stagedSignupData = null;
       return;
     }
 
     if (result.role === "customer") {
       currentCustomer = result.customer;
       renderCustomerHub(result.customer, result.orders);
+      updateNavAuth(result.customer);
     }
 
     if (result.role === "admin") {
@@ -500,6 +684,24 @@ async function loadSession() {
     showToast("Unable to restore session.", true);
   }
 }
+
+navHubButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  scrollToSection("customer-hub");
+});
+
+navSignoutButton?.addEventListener("click", async () => {
+  await fetch("/api/auth/logout", { method: "POST" });
+  currentCustomer = null;
+  renderCustomerHub(null);
+  updateNavAuth(null);
+  showToast("Signed out.");
+});
+
+document.querySelector("#view-customer-hub")?.addEventListener("click", (event) => {
+  event.preventDefault();
+  scrollToSection("customer-hub");
+});
 
 updateStepper();
 loadSession();

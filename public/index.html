@@ -27,6 +27,13 @@
           <a href="#customer-hub">Customer hub</a>
           <a href="#ops">Operations</a>
         </nav>
+        <div class="nav-auth">
+          <span class="nav-auth-status" id="nav-auth-status" hidden></span>
+          <button class="nav-auth-link" type="button" id="open-signin">Sign in</button>
+          <button class="button button-primary nav-auth-button" type="button" id="open-signup">Sign up</button>
+          <a class="button button-secondary nav-hub-button" href="#customer-hub" id="nav-hub-button" hidden>Customer hub</a>
+          <button class="nav-auth-link" type="button" id="nav-signout" hidden>Sign out</button>
+        </div>
       </div>
     </header>
 
@@ -259,10 +266,10 @@
       <section class="section experience" id="experience">
         <div class="section-heading">
           <p class="eyebrow">Customer experience</p>
-          <h2>First-time registration, sign in, and repeat bag booking.</h2>
+          <h2>First-time registration and repeat bag booking.</h2>
           <p>
-            The tabs below cover the main user journeys from the original mobile
-            flow, translated into a web experience.
+            The booking section below focuses on ordering flows only. Account
+            sign in and sign up now live in the navigation popups.
           </p>
         </div>
 
@@ -291,13 +298,6 @@
                 type="button"
               >
                 First Order
-              </button>
-              <button
-                class="tab-button"
-                data-tab-target="login-tab"
-                type="button"
-              >
-                Sign In
               </button>
               <button
                 class="tab-button"
@@ -630,6 +630,7 @@
                         rel="noreferrer"
                         >Open text export</a
                       >
+                      <a class="button button-secondary" href="#customer-hub" id="view-customer-hub">View customer hub</a>
                       <button
                         class="button button-secondary"
                         id="new-order"
@@ -640,54 +641,6 @@
                     </div>
                   </section>
                 </section>
-              </div>
-            </div>
-
-            <div class="tab-panel" id="login-tab">
-              <div class="simple-grid">
-                <form class="panel-card" id="login-form">
-                  <div class="card-title">
-                    <p class="eyebrow">Returning customer</p>
-                    <h3>Sign in to your account</h3>
-                  </div>
-                  <div class="form-grid compact">
-                    <label class="full">
-                      <span>Email</span>
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="alex@example.com"
-                        required
-                      />
-                    </label>
-                    <label class="full">
-                      <span>Password</span>
-                      <input
-                        type="password"
-                        name="password"
-                        placeholder="Your password"
-                        required
-                      />
-                    </label>
-                  </div>
-                  <div class="wizard-actions">
-                    <button class="button button-primary" type="submit">
-                      Sign in
-                    </button>
-                  </div>
-                </form>
-
-                <div class="panel-card">
-                  <div class="card-title">
-                    <p class="eyebrow">Why sign in</p>
-                    <h3>Skip repeating your details</h3>
-                  </div>
-                  <div class="info-list">
-                    <div>See your saved bag QR code</div>
-                    <div>Track recent pickups and invoice numbers</div>
-                    <div>Reuse your address for quick scheduling</div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -931,6 +884,85 @@
         </div>
       </section>
     </main>
+
+    <div class="auth-modal" id="auth-modal" hidden>
+      <div class="auth-overlay" data-close-auth="true"></div>
+      <div class="auth-dialog">
+        <button class="auth-close" type="button" id="close-auth" aria-label="Close">×</button>
+        <div class="auth-switcher">
+          <button class="auth-switch active" type="button" data-auth-panel="signin-panel">Sign in</button>
+          <button class="auth-switch" type="button" data-auth-panel="signup-panel">Sign up</button>
+        </div>
+
+        <div class="auth-panel active" id="signin-panel">
+          <form id="login-form">
+            <div class="card-title">
+              <p class="eyebrow">Returning customer</p>
+              <h3>Sign in to your account</h3>
+            </div>
+            <div class="form-grid compact auth-grid">
+              <label class="full">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="alex@example.com" required />
+              </label>
+              <label class="full">
+                <span>Password</span>
+                <input type="password" name="password" placeholder="Your password" required />
+              </label>
+            </div>
+            <div class="wizard-actions">
+              <button class="button button-primary" type="submit">Sign in</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="auth-panel" id="signup-panel">
+          <form id="signup-form">
+            <div class="card-title">
+              <p class="eyebrow">New customer</p>
+              <h3>Create your account</h3>
+            </div>
+            <div class="form-grid auth-grid">
+              <label>
+                <span>First name</span>
+                <input type="text" name="firstName" placeholder="Alex" required />
+              </label>
+              <label>
+                <span>Last name</span>
+                <input type="text" name="lastName" placeholder="Morgan" required />
+              </label>
+              <label class="full">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="alex@example.com" required />
+              </label>
+              <label class="full">
+                <span>Password</span>
+                <input type="password" name="password" placeholder="Create a secure password" required />
+              </label>
+              <label class="full">
+                <span>Address</span>
+                <input type="text" name="address" placeholder="12 Riverfront Residency" required />
+              </label>
+              <label>
+                <span>Postal code</span>
+                <input type="text" name="postalCode" placeholder="9490" required />
+              </label>
+              <label>
+                <span>City</span>
+                <input type="text" name="city" placeholder="Vaduz" required />
+              </label>
+              <label class="full">
+                <span>Phone</span>
+                <input type="tel" name="phone" placeholder="+41 79 123 45 67" />
+              </label>
+            </div>
+            <div class="wizard-actions">
+              <button class="button button-primary" type="submit">Create account</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <div class="toast" id="toast" hidden></div>
 

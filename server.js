@@ -995,6 +995,85 @@ async function handleRegister(req, res) {
   }
 }
 
+async function handleSignup(req, res) {
+  try {
+    const body = await parseBody(req);
+    const requiredFields = [
+      "email",
+      "firstName",
+      "lastName",
+      "address",
+      "postalCode",
+      "city",
+      "password",
+    ];
+
+    for (const field of requiredFields) {
+      if (!body[field] || String(body[field]).trim() === "") {
+        sendJson(res, 400, { error: `${field} is required` });
+        return;
+      }
+    }
+
+    const email = String(body.email).trim().toLowerCase();
+    const existingCustomer = getCustomerByEmail(email);
+    if (existingCustomer) {
+      sendJson(res, 400, { error: "An account with this email already exists. Please sign in." });
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const customerId = crypto.randomUUID();
+    const bagCode = `LB-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+    const qrPayload = `laundry.li/bag/${bagCode}`;
+    const qrSvg = await QRCode.toString(qrPayload, {
+      type: "svg",
+      margin: 1,
+      width: 240,
+      color: {
+        dark: "#6b4d2f",
+        light: "#0000",
+      },
+    });
+
+    dbRun(`
+      INSERT INTO customers (
+        id, email, first_name, last_name, address, postal_code, city, phone,
+        bag_code, qr_payload, qr_svg, created_at, password_hash, status, last_login_at
+      ) VALUES (
+        ${sqlEscape(customerId)},
+        ${sqlEscape(email)},
+        ${sqlEscape(body.firstName)},
+        ${sqlEscape(body.lastName)},
+        ${sqlEscape(body.address)},
+        ${sqlEscape(body.postalCode)},
+        ${sqlEscape(body.city)},
+        ${sqlEscape(body.phone || null)},
+        ${sqlEscape(bagCode)},
+        ${sqlEscape(qrPayload)},
+        ${sqlEscape(qrSvg)},
+        ${sqlEscape(now)},
+        ${sqlEscape(hashPassword(body.password))},
+        'active',
+        ${sqlEscape(now)}
+      );
+    `);
+
+    const customer = getCustomerByEmail(email);
+    createSession(res, "customer", customer.id);
+
+    sendJson(res, 201, {
+      success: true,
+      role: "customer",
+      customer: serializeCustomer(customer),
+      orders: [],
+    });
+  } catch (error) {
+    console.error(error);
+    sendJson(res, 500, { error: "Unable to create account" });
+  }
+}
+
 async function handleCustomerLogin(req, res) {
   try {
     const body = await parseBody(req);
@@ -1302,6 +1381,11 @@ const server = http.createServer((req, res) => {
 
   if (req.method === "POST" && (pathname === "/api/register" || pathname === "/api/auth/register")) {
     handleRegister(req, res);
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/api/auth/signup") {
+    handleSignup(req, res);
     return;
   }
 
