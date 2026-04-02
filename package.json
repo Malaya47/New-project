@@ -1,12 +1,12 @@
 {
-  "name": "laundry-web-app",
+  "name": "laundry-monorepo",
+  "private": true,
   "version": "1.0.0",
-  "description": "Laundry pickup web app with QR registration and printable invoices",
-  "main": "server.js",
+  "description": "Laundry pickup app with separate Next.js frontend and JavaScript backend",
   "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "qrcode": "^1.5.4"
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "start:frontend": "npm --prefix frontend run start",
+    "start:backend": "npm --prefix backend run start"
   }
 }

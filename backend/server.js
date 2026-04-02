@@ -6,11 +6,10 @@ const crypto = require("crypto");
 const { execFileSync } = require("child_process");
 const QRCode = require("qrcode");
 
-const HOST = "127.0.0.1";
-const PORT = Number(process.env.PORT || 3000);
+const HOST = process.env.HOST || "127.0.0.1";
+const PORT = Number(process.env.PORT || 4000);
 const ROOT = __dirname;
-const PUBLIC_DIR = path.join(ROOT, "public");
-const DATA_DIR = path.join(ROOT, "data");
+const DATA_DIR = path.join(ROOT, "..", "data");
 const DB_PATH = path.join(DATA_DIR, "laundry.sqlite");
 const SESSION_COOKIE = "laundry_session";
 const DEFAULT_RETURN_WINDOW = "Within 48 hours between 6:00 PM and 9:00 PM";
@@ -20,7 +19,6 @@ const ADMIN_PASSWORD = "LaundryAdmin123!";
 const ORDER_STATUSES = ["scheduled", "picked_up", "processing", "returning", "completed"];
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
-fs.mkdirSync(PUBLIC_DIR, { recursive: true });
 
 function sqlEscape(value) {
   if (value === undefined || value === null || value === "") {
@@ -654,29 +652,6 @@ function sendText(res, statusCode, text) {
   res.end(text);
 }
 
-function sendFile(res, filePath) {
-  const ext = path.extname(filePath).toLowerCase();
-  const types = {
-    ".html": "text/html; charset=utf-8",
-    ".css": "text/css; charset=utf-8",
-    ".js": "application/javascript; charset=utf-8",
-    ".svg": "image/svg+xml",
-    ".json": "application/json; charset=utf-8",
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-  };
-
-  if (!fs.existsSync(filePath)) {
-    res.writeHead(404);
-    res.end("Not found");
-    return;
-  }
-
-  res.writeHead(200, { "Content-Type": types[ext] || "application/octet-stream" });
-  fs.createReadStream(filePath).pipe(res);
-}
-
 function createSession(res, role, userId) {
   const sessionId = crypto.randomUUID();
   const createdAt = new Date();
@@ -765,6 +740,67 @@ function getAdminByEmail(email) {
     WHERE email = ${sqlEscape(String(email).trim().toLowerCase())}
     LIMIT 1;
   `)[0];
+}
+
+async function createBagIdentity() {
+  const bagCode = `LB-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+  const qrPayload = `laundry.li/bag/${bagCode}`;
+  const qrSvg = await QRCode.toString(qrPayload, {
+    type: "svg",
+    margin: 1,
+    width: 240,
+    color: {
+      dark: "#6b4d2f",
+      light: "#0000",
+    },
+  });
+
+  return { bagCode, qrPayload, qrSvg };
+}
+
+function insertCustomerRecord({
+  customerId,
+  email,
+  firstName = "",
+  lastName = "",
+  address = "",
+  postalCode = "",
+  city = "",
+  phone = null,
+  bagCode,
+  qrPayload,
+  qrSvg,
+  passwordHash,
+  now,
+}) {
+  const safeFirstName = String(firstName || "").trim() || "Pending";
+  const safeLastName = String(lastName || "").trim() || "Customer";
+  const safeAddress = String(address || "").trim() || "Address pending";
+  const safePostalCode = String(postalCode || "").trim() || "Pending";
+  const safeCity = String(city || "").trim() || "Pending";
+
+  dbRun(`
+    INSERT INTO customers (
+      id, email, first_name, last_name, address, postal_code, city, phone,
+      bag_code, qr_payload, qr_svg, created_at, password_hash, status, last_login_at
+    ) VALUES (
+      ${sqlEscape(customerId)},
+      ${sqlEscape(email)},
+      ${sqlEscape(safeFirstName)},
+      ${sqlEscape(safeLastName)},
+      ${sqlEscape(safeAddress)},
+      ${sqlEscape(safePostalCode)},
+      ${sqlEscape(safeCity)},
+      ${sqlEscape(phone)},
+      ${sqlEscape(bagCode)},
+      ${sqlEscape(qrPayload)},
+      ${sqlEscape(qrSvg)},
+      ${sqlEscape(now)},
+      ${sqlEscape(passwordHash)},
+      'active',
+      ${sqlEscape(now)}
+    );
+  `);
 }
 
 function buildOrderPayload({ customer, body }) {
@@ -859,15 +895,19 @@ function getOrdersForCustomer(customerId) {
   `);
 }
 
+function cleanCustomerProfileValue(value, placeholder) {
+  return value === placeholder ? "" : value;
+}
+
 function serializeCustomer(customer) {
   return {
     id: customer.id,
     email: customer.email,
-    firstName: customer.first_name,
-    lastName: customer.last_name,
-    address: customer.address,
-    postalCode: customer.postal_code,
-    city: customer.city,
+    firstName: cleanCustomerProfileValue(customer.first_name, "Pending"),
+    lastName: cleanCustomerProfileValue(customer.last_name, "Customer"),
+    address: cleanCustomerProfileValue(customer.address, "Address pending"),
+    postalCode: cleanCustomerProfileValue(customer.postal_code, "Pending"),
+    city: cleanCustomerProfileValue(customer.city, "Pending"),
     phone: customer.phone,
     bagCode: customer.bag_code,
     qrPayload: customer.qr_payload,
@@ -920,40 +960,23 @@ async function handleRegister(req, res) {
 
     if (!customer) {
       const customerId = crypto.randomUUID();
-      const bagCode = `LB-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
-      const qrPayload = `laundry.li/bag/${bagCode}`;
-      const qrSvg = await QRCode.toString(qrPayload, {
-        type: "svg",
-        margin: 1,
-        width: 240,
-        color: {
-          dark: "#6b4d2f",
-          light: "#0000",
-        },
-      });
+      const { bagCode, qrPayload, qrSvg } = await createBagIdentity();
 
-      dbRun(`
-        INSERT INTO customers (
-          id, email, first_name, last_name, address, postal_code, city, phone,
-          bag_code, qr_payload, qr_svg, created_at, password_hash, status, last_login_at
-        ) VALUES (
-          ${sqlEscape(customerId)},
-          ${sqlEscape(email)},
-          ${sqlEscape(body.firstName)},
-          ${sqlEscape(body.lastName)},
-          ${sqlEscape(body.address)},
-          ${sqlEscape(body.postalCode)},
-          ${sqlEscape(body.city)},
-          ${sqlEscape(body.phone || null)},
-          ${sqlEscape(bagCode)},
-          ${sqlEscape(qrPayload)},
-          ${sqlEscape(qrSvg)},
-          ${sqlEscape(now)},
-          ${sqlEscape(hashPassword(body.password))},
-          'active',
-          ${sqlEscape(now)}
-        );
-      `);
+      insertCustomerRecord({
+        customerId,
+        email,
+        firstName: body.firstName,
+        lastName: body.lastName,
+        address: body.address,
+        postalCode: body.postalCode,
+        city: body.city,
+        phone: body.phone || null,
+        bagCode,
+        qrPayload,
+        qrSvg,
+        passwordHash: hashPassword(body.password),
+        now,
+      });
     } else {
       dbRun(`
         UPDATE customers
@@ -1024,40 +1047,23 @@ async function handleSignup(req, res) {
 
     const now = new Date().toISOString();
     const customerId = crypto.randomUUID();
-    const bagCode = `LB-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
-    const qrPayload = `laundry.li/bag/${bagCode}`;
-    const qrSvg = await QRCode.toString(qrPayload, {
-      type: "svg",
-      margin: 1,
-      width: 240,
-      color: {
-        dark: "#6b4d2f",
-        light: "#0000",
-      },
-    });
+    const { bagCode, qrPayload, qrSvg } = await createBagIdentity();
 
-    dbRun(`
-      INSERT INTO customers (
-        id, email, first_name, last_name, address, postal_code, city, phone,
-        bag_code, qr_payload, qr_svg, created_at, password_hash, status, last_login_at
-      ) VALUES (
-        ${sqlEscape(customerId)},
-        ${sqlEscape(email)},
-        ${sqlEscape(body.firstName)},
-        ${sqlEscape(body.lastName)},
-        ${sqlEscape(body.address)},
-        ${sqlEscape(body.postalCode)},
-        ${sqlEscape(body.city)},
-        ${sqlEscape(body.phone || null)},
-        ${sqlEscape(bagCode)},
-        ${sqlEscape(qrPayload)},
-        ${sqlEscape(qrSvg)},
-        ${sqlEscape(now)},
-        ${sqlEscape(hashPassword(body.password))},
-        'active',
-        ${sqlEscape(now)}
-      );
-    `);
+    insertCustomerRecord({
+      customerId,
+      email,
+      firstName: body.firstName,
+      lastName: body.lastName,
+      address: body.address,
+      postalCode: body.postalCode,
+      city: body.city,
+      phone: body.phone || null,
+      bagCode,
+      qrPayload,
+      qrSvg,
+      passwordHash: hashPassword(body.password),
+      now,
+    });
 
     const customer = getCustomerByEmail(email);
     createSession(res, "customer", customer.id);
@@ -1100,6 +1106,72 @@ async function handleCustomerLogin(req, res) {
   } catch (error) {
     console.error(error);
     sendJson(res, 500, { error: "Unable to sign in" });
+  }
+}
+
+async function handleCustomerStart(req, res) {
+  try {
+    const body = await parseBody(req);
+    const email = String(body.email || "").trim().toLowerCase();
+    const password = String(body.password || "");
+
+    if (!email || !password) {
+      sendJson(res, 400, { error: "email and password are required" });
+      return;
+    }
+
+    const customer = getCustomerByEmail(email);
+
+    if (!customer) {
+      const now = new Date().toISOString();
+      const customerId = crypto.randomUUID();
+      const { bagCode, qrPayload, qrSvg } = await createBagIdentity();
+
+      insertCustomerRecord({
+        customerId,
+        email,
+        bagCode,
+        qrPayload,
+        qrSvg,
+        passwordHash: hashPassword(password),
+        now,
+      });
+
+      const createdCustomer = getCustomerByEmail(email);
+      createSession(res, "customer", createdCustomer.id);
+
+      sendJson(res, 200, {
+        success: true,
+        mode: "signup",
+        role: "customer",
+        customer: serializeCustomer(createdCustomer),
+        orders: [],
+      });
+      return;
+    }
+
+    if (!verifyPassword(password, customer.password_hash)) {
+      sendJson(res, 401, { error: "Incorrect password for this email" });
+      return;
+    }
+
+    dbRun(`
+      UPDATE customers
+      SET last_login_at = ${sqlEscape(new Date().toISOString())}
+      WHERE id = ${sqlEscape(customer.id)};
+    `);
+
+    createSession(res, "customer", customer.id);
+    sendJson(res, 200, {
+      success: true,
+      mode: "login",
+      role: "customer",
+      customer: serializeCustomer(customer),
+      orders: getOrdersForCustomer(customer.id),
+    });
+  } catch (error) {
+    console.error(error);
+    sendJson(res, 500, { error: "Unable to start account flow" });
   }
 }
 
@@ -1268,7 +1340,9 @@ function getAdminOverviewData() {
       c.first_name,
       c.last_name,
       c.email,
-      c.bag_code
+      c.bag_code,
+      c.qr_svg,
+      c.qr_payload
     FROM orders o
     JOIN customers c ON c.id = o.customer_id
     ORDER BY o.created_at DESC
@@ -1276,7 +1350,7 @@ function getAdminOverviewData() {
   `);
 
   const customers = dbGet(`
-    SELECT id, first_name, last_name, email, city, bag_code, status, created_at
+    SELECT id, first_name, last_name, email, city, bag_code, qr_svg, qr_payload, status, created_at
     FROM customers
     ORDER BY created_at DESC
     LIMIT 12;
@@ -1394,6 +1468,11 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (req.method === "POST" && pathname === "/api/auth/start") {
+    handleCustomerStart(req, res);
+    return;
+  }
+
   if (req.method === "POST" && pathname === "/api/admin/login") {
     handleAdminLogin(req, res);
     return;
@@ -1439,21 +1518,17 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  let filePath = path.join(PUBLIC_DIR, pathname === "/" ? "index.html" : pathname);
-  filePath = path.normalize(filePath);
-
-  if (!filePath.startsWith(PUBLIC_DIR)) {
-    res.writeHead(403);
-    res.end("Forbidden");
+  if (req.method === "GET" && pathname === "/health") {
+    sendJson(res, 200, { ok: true, service: "laundry-backend" });
     return;
   }
 
-  sendFile(res, filePath);
+  sendJson(res, 404, { error: "Not found" });
 });
 
 if (require.main === module) {
   server.listen(PORT, HOST, () => {
-    console.log(`Laundry app running at http://${HOST}:${PORT}`);
+    console.log(`Laundry backend running at http://${HOST}:${PORT}`);
   });
 }
 

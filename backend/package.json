@@ -1,0 +1,14 @@
+{
+  "name": "laundry-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JavaScript backend for laundry.li",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
