@@ -74,14 +74,21 @@ export function TopNav({
                 {userName}
               </span>
               {onSignout ? (
-                <button type="button" onClick={onSignout} className="text-sm font-extrabold text-sand-700">
+                <button
+                  type="button"
+                  onClick={onSignout}
+                  className="text-sm font-extrabold text-sand-700"
+                >
                   Sign out
                 </button>
               ) : null}
             </>
           ) : null}
           {!compact ? (
-            <Link href="/admin" className="text-sm font-extrabold text-sand-700">
+            <Link
+              href="/admin"
+              className="text-sm font-extrabold text-sand-700"
+            >
               Admin
             </Link>
           ) : null}
@@ -105,9 +112,13 @@ export function QrCard({
   className = "",
 }) {
   return (
-    <div className={`rounded-[1.6rem] border border-sand-200 bg-white/88 p-5 shadow-soft ${className}`}>
+    <div
+      className={`rounded-[1.6rem] border border-sand-200 bg-white/88 p-5 shadow-soft ${className}`}
+    >
       <small className="block text-sand-600">{title}</small>
-      <strong className="mt-2 block text-lg text-sand-900">{bagCode || "Bag code pending"}</strong>
+      <strong className="mt-2 block text-lg text-sand-900">
+        {bagCode || "Bag code pending"}
+      </strong>
       <p className="mt-2 text-sm leading-6 text-sand-700">{subtitle}</p>
       {qrSvg ? (
         <div className="mt-5 flex items-center justify-center rounded-[1.4rem] border border-sand-200 bg-sand-50 p-4">
@@ -121,17 +132,32 @@ export function QrCard({
   );
 }
 
-export function SectionHeading({ eyebrow, title, description, centered = false }) {
+export function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  centered = false,
+}) {
   return (
     <div className={centered ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
-      <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.28em] text-sand-700">{eyebrow}</p>
-      <h2 className="font-display text-4xl leading-none text-sand-900 md:text-5xl">{title}</h2>
+      <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.28em] text-sand-700">
+        {eyebrow}
+      </p>
+      <h2 className="font-display text-4xl leading-none text-sand-900 md:text-5xl">
+        {title}
+      </h2>
       <p className="mt-4 text-base leading-8 text-sand-700">{description}</p>
     </div>
   );
 }
 
-export function ActionButton({ variant = "primary", className = "", asChild = false, children, ...props }) {
+export function ActionButton({
+  variant = "primary",
+  className = "",
+  asChild = false,
+  children,
+  ...props
+}) {
   const styles =
     variant === "primary"
       ? "bg-gold-pill text-white shadow-glow"
@@ -210,7 +236,11 @@ export function LaundryTypeCard({ active, label, description, onClick }) {
     >
       <div className="font-display text-3xl">{label}</div>
       {description ? (
-        <p className={`mt-2 text-sm ${active ? "text-white/85" : "text-sand-600"}`}>{description}</p>
+        <p
+          className={`mt-2 text-sm ${active ? "text-white/85" : "text-sand-600"}`}
+        >
+          {description}
+        </p>
       ) : null}
     </button>
   );
@@ -280,5 +310,175 @@ export function Toast({ toast }) {
     >
       {toast.message}
     </div>
+  );
+}
+
+export function Footer() {
+  return (
+    <footer className="mt-16 border-t border-sand-200 bg-sand-50">
+      <div className="mx-auto max-w-7xl px-4 py-16">
+        <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-4">
+          {/* Brand */}
+          <div>
+            <Link
+              href="/"
+              className="font-display text-3xl font-bold text-sand-900"
+            >
+              laundry.li
+            </Link>
+            <p className="mt-4 text-sm leading-7 text-sand-600">
+              Premium laundry and dry cleaning delivered to your door.
+              Modernizing fabric care for the busy professional.
+            </p>
+            <div className="mt-5 flex gap-3">
+              <a
+                href="#"
+                aria-label="Twitter"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-white text-sand-600 transition hover:border-sand-400 hover:text-sand-900"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.726-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-white text-sand-600 transition hover:border-sand-400 hover:text-sand-900"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </a>
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-white text-sand-600 transition hover:border-sand-400 hover:text-sand-900"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          {/* Services */}
+          <div>
+            <h4 className="text-sm font-extrabold uppercase tracking-[0.2em] text-sand-900">
+              Services
+            </h4>
+            <ul className="mt-5 space-y-4 text-sm text-sand-600">
+              <li>
+                <a href="#" className="transition hover:text-sand-900">
+                  Wash &amp; Fold
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition hover:text-sand-900">
+                  Dry Cleaning
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition hover:text-sand-900">
+                  Iron &amp; Press
+                </a>
+              </li>
+              <li>
+                <a href="#" className="transition hover:text-sand-900">
+                  Commercial Laundry
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div>
+            <h4 className="text-sm font-extrabold uppercase tracking-[0.2em] text-sand-900">
+              Company
+            </h4>
+            <ul className="mt-5 space-y-4 text-sm text-sand-600">
+              <li>
+                <Link href="/" className="transition hover:text-sand-900">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/how-it-works"
+                  className="transition hover:text-sand-900"
+                >
+                  How it Works
+                </Link>
+              </li>
+              <li>
+                <Link href="/book" className="transition hover:text-sand-900">
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="transition hover:text-sand-900">
+                  Careers
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Stay Updated */}
+          <div>
+            <h4 className="text-sm font-extrabold uppercase tracking-[0.2em] text-sand-900">
+              Stay Updated
+            </h4>
+            <p className="mt-4 text-sm leading-7 text-sand-600">
+              Subscribe to our newsletter for tips on fabric care and exclusive
+              offers.
+            </p>
+            <div className="mt-5 space-y-3">
+              <input
+                type="email"
+                placeholder="Email address"
+                className="w-full rounded-[1.25rem] bg-gold-pill px-4 py-3 text-sm font-semibold text-white placeholder-white/70 outline-none"
+              />
+              <button
+                type="button"
+                className="w-full rounded-[1.25rem] border border-sand-200 bg-white px-4 py-3 text-sm font-extrabold text-sand-900 shadow-soft transition hover:border-sand-400"
+              >
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-sand-200">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-sm text-sand-600">
+          <p>© 2026 laundry.li. All rights reserved.</p>
+          <div className="flex gap-6">
+            <a href="#" className="transition hover:text-sand-900">
+              Privacy Policy
+            </a>
+            <a href="#" className="transition hover:text-sand-900">
+              Terms of Service
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }

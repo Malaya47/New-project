@@ -1,6 +1,136 @@
 import Link from "next/link";
 import { rules, services } from "../lib/site-data";
-import { ActionButton, HeroVisual, PageGlow, SectionHeading, TopNav } from "./shared-ui";
+import {
+  ActionButton,
+  Footer,
+  HeroVisual,
+  PageGlow,
+  SectionHeading,
+  TopNav,
+} from "./shared-ui";
+
+const ruleIcons = [
+  /* Prepare – shopping basket */
+  <svg
+    key="basket"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <path d="M16 10a4 4 0 0 1-8 0" />
+  </svg>,
+  /* Know – info circle */
+  <svg
+    key="info"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="8" strokeWidth="2.5" />
+    <line x1="12" y1="12" x2="12" y2="16" />
+  </svg>,
+  /* Not accepted – ban */
+  <svg
+    key="ban"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+  </svg>,
+];
+
+const serviceIcons = [
+  /* Washing – detergent bottle */
+  <svg
+    key="wash"
+    width="26"
+    height="26"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M4 3h16v4H4z" />
+    <path d="M4 7v13a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7" />
+    <circle cx="12" cy="14" r="3" />
+    <path d="M9 10h1" />
+  </svg>,
+  /* Drying – wind */
+  <svg
+    key="dry"
+    width="26"
+    height="26"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2" />
+    <path d="M9.6 4.6A2 2 0 1 1 11 8H2" />
+    <path d="M12.6 19.4A2 2 0 1 0 14 16H2" />
+  </svg>,
+  /* Ironing – t-shirt */
+  <svg
+    key="iron"
+    width="26"
+    height="26"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z" />
+  </svg>,
+  /* Folding – stacked layers */
+  <svg
+    key="fold"
+    width="26"
+    height="26"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m12 2 10 6.5-10 6.5L2 8.5 12 2z" />
+    <path d="m20 13 2 1.5-10 6.5L2 14.5l2-1.5" />
+    <path d="m20 18 2 1.5-10 6.5L2 19.5l2-1.5" />
+  </svg>,
+];
 
 export default function HomePage() {
   return (
@@ -11,14 +141,16 @@ export default function HomePage() {
       <main>
         <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-20 pt-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
           <div>
-            <h1 className="max-w-[10ch] font-display text-6xl leading-none md:text-8xl">
-              We pick up your laundry.
+            <h1 className="font-display text-6xl leading-none md:text-8xl">
+              We pick up{" "}
+              <span className="whitespace-nowrap">your laundry.</span>
             </h1>
             <p className="mt-6 text-sm font-extrabold uppercase tracking-[0.3em] text-sand-700">
               Clean. Ironed. Folded back.
             </p>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-sand-700">
-              A warmer, simpler laundry experience for the web. Register once, use your QR-linked bag, and schedule pickups in a few clear steps.
+              A warmer, simpler laundry experience for the web. Register once,
+              use your QR-linked bag, and schedule pickups in a few clear steps.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link href="/book">
@@ -31,7 +163,8 @@ export default function HomePage() {
               </Link>
             </div>
             <p className="mt-6 text-base leading-8 text-sand-700">
-              Returned within 48 hours with monthly billing in CHF and no online checkout at pickup time.
+              Returned within 48 hours with monthly billing in CHF and no online
+              checkout at pickup time.
             </p>
           </div>
 
@@ -47,22 +180,32 @@ export default function HomePage() {
           />
           <div className="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2">
             <article className="rounded-[2rem] border border-sand-200 bg-white/80 p-8 shadow-soft">
-              <p className="text-lg font-semibold text-sand-700">One-time order</p>
-              <div className="mt-6 font-display text-6xl leading-none">CHF 55</div>
+              <p className="text-lg font-semibold text-sand-700">
+                One-time order
+              </p>
+              <div className="mt-6 font-display text-6xl leading-none">
+                CHF 55
+              </div>
               <p className="mt-3 text-sand-700">per laundry bag</p>
               <p className="mt-5 text-sm leading-7 text-sand-700">
-                Approx. 5 to 6 kg of everyday laundry. Washing, drying, ironing, and folding included.
+                Approx. 5 to 6 kg of everyday laundry. Washing, drying, ironing,
+                and folding included.
               </p>
             </article>
             <article className="relative rounded-[2rem] border border-sand-200 bg-white/90 p-8 shadow-glow">
               <span className="absolute right-5 top-5 rounded-full bg-gold-pill px-4 py-2 text-xs font-extrabold uppercase tracking-[0.2em] text-white">
                 Popular
               </span>
-              <p className="text-lg font-semibold text-sand-700">Subscription</p>
-              <div className="mt-6 font-display text-6xl leading-none">CHF 50</div>
+              <p className="text-lg font-semibold text-sand-700">
+                Subscription
+              </p>
+              <div className="mt-6 font-display text-6xl leading-none">
+                CHF 50
+              </div>
               <p className="mt-3 text-sand-700">per bag</p>
               <p className="mt-5 text-sm leading-7 text-sand-700">
-                Best for fixed weekly pickups with the same premium wash, dry, iron, and fold flow.
+                Best for fixed weekly pickups with the same premium wash, dry,
+                iron, and fold flow.
               </p>
             </article>
           </div>
@@ -78,13 +221,24 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="Our service"
             title="We handle the part that takes time."
-            description="Inspired by the mobile references, the homepage now stays clean: service quality, bag-based convenience, and clear reasons to book."
+            description="Service quality, bag-based convenience, and clear reasons to book — all in one place."
+            centered
           />
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {services.map((service) => (
-              <article key={service.title} className="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-soft">
-                <h3 className="font-display text-3xl leading-none">{service.title}</h3>
-                <p className="mt-4 text-sm leading-7 text-sand-700">{service.description}</p>
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            {services.map((service, index) => (
+              <article
+                key={service.title}
+                className="rounded-[2rem] bg-sand-100 border border-sand-200 p-7 shadow-soft"
+              >
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-sand-500 shadow-soft">
+                  {serviceIcons[index]}
+                </div>
+                <h3 className="mt-5 text-2xl font-bold text-sand-900">
+                  {service.title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-sand-700">
+                  {service.description}
+                </p>
               </article>
             ))}
           </div>
@@ -101,14 +255,28 @@ export default function HomePage() {
                 />
               </div>
               <div>
-                <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-sand-700">Everyday laundry</p>
-                <h2 className="mt-3 font-display text-5xl leading-none">Designed for repeat use, not one-off friction.</h2>
+                <p className="text-xs font-extrabold uppercase tracking-[0.28em] text-sand-700">
+                  Everyday laundry
+                </p>
+                <h2 className="mt-3 font-display text-5xl leading-none">
+                  Designed for repeat use, not one-off friction.
+                </h2>
                 <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-sand-700">
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">Shirts</span>
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">Trousers</span>
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">Underwear</span>
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">Sportswear</span>
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">Towels</span>
+                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
+                    Shirts
+                  </span>
+                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
+                    Trousers
+                  </span>
+                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
+                    Underwear
+                  </span>
+                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
+                    Sportswear
+                  </span>
+                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
+                    Towels
+                  </span>
                 </div>
                 <div className="mt-8">
                   <Link href="/book">
@@ -125,23 +293,54 @@ export default function HomePage() {
             eyebrow="Preparation"
             title="Prepare it simply. We handle the rest."
             description="The detailed process is now on its own page, while the homepage keeps only the most important preparation guidance."
+            centered
           />
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
-            {rules.map((rule) => (
-              <article key={rule.title} className="rounded-[2rem] border border-sand-200 bg-white/80 p-6 shadow-soft">
-                <h3 className="font-display text-3xl leading-none">{rule.title}</h3>
-                <ul className="mt-4 space-y-3 text-sm leading-7 text-sand-700">
-                  {rule.items.map((item) => (
-                    <li key={item}>• {item}</li>
-                  ))}
-                </ul>
+          <div className="mt-8  mx-auto max-w-2xl space-y-4">
+            {rules.map((rule, index) => (
+              <article
+                key={rule.title}
+                className="flex gap-5 border border-sand-200 rounded-[2rem] bg-sand-100 p-6"
+              >
+                {/* Icon */}
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-sand-500 shadow-soft">
+                  {ruleIcons[index]}
+                </div>
+
+                {/* Content */}
+                <div>
+                  <h3 className="text-lg font-bold text-sand-900">
+                    {rule.title}
+                  </h3>
+                  <ul className="mt-3 space-y-2">
+                    {rule.items.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-start gap-2 text-sm leading-6 text-sand-700"
+                      >
+                        {rule.type === "cross" ? (
+                          <span className="mt-0.5 shrink-0 text-red-400 font-bold">
+                            ✕
+                          </span>
+                        ) : (
+                          <span className="mt-0.5 shrink-0 text-green-600 font-bold">
+                            ✓
+                          </span>
+                        )}
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </article>
             ))}
           </div>
           <div className="mt-10 rounded-[2rem] bg-[linear-gradient(135deg,#b88749,#8c6338)] p-8 text-white shadow-glow">
-            <h3 className="font-display text-4xl leading-none">Ready for less laundry effort?</h3>
+            <h3 className="font-display text-4xl leading-none">
+              Ready for less laundry effort?
+            </h3>
             <p className="mt-4 max-w-2xl text-base leading-8 text-white/85">
-              Keep the homepage simple and go straight into a separate booking flow when you are ready.
+              Keep the homepage simple and go straight into a separate booking
+              flow when you are ready.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               <Link href="/book">
@@ -158,6 +357,7 @@ export default function HomePage() {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

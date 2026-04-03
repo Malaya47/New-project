@@ -8,6 +8,7 @@ import {
   ActionButton,
   apiFetch,
   capitalize,
+  Footer,
   formatCurrency,
   formatPickupDate,
   Input,
@@ -63,12 +64,16 @@ function StepPill({ number, label, active, complete }) {
     >
       <span
         className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-extrabold ${
-          active || complete ? "bg-sand-100 text-sand-900" : "bg-sand-50 text-sand-500"
+          active || complete
+            ? "bg-sand-100 text-sand-900"
+            : "bg-sand-50 text-sand-500"
         }`}
       >
         {complete ? "✓" : number}
       </span>
-      <span className="text-xs font-extrabold uppercase tracking-[0.18em]">{label}</span>
+      <span className="text-xs font-extrabold uppercase tracking-[0.18em]">
+        {label}
+      </span>
     </div>
   );
 }
@@ -77,16 +82,34 @@ function SummaryRow({ label, value, strong = false }) {
   return (
     <div className="flex items-center justify-between gap-4 text-sm">
       <span className="text-sand-600">{label}</span>
-      <span className={strong ? "font-extrabold text-sand-900" : "font-semibold text-sand-800"}>{value}</span>
+      <span
+        className={
+          strong
+            ? "font-extrabold text-sand-900"
+            : "font-semibold text-sand-800"
+        }
+      >
+        {value}
+      </span>
     </div>
   );
 }
 
-function CounterCard({ title, subtitle, price, count, active = false, onDecrease, onIncrease }) {
+function CounterCard({
+  title,
+  subtitle,
+  price,
+  count,
+  active = false,
+  onDecrease,
+  onIncrease,
+}) {
   return (
     <article
       className={`rounded-[1.8rem] border p-5 transition ${
-        active ? "border-sand-500 bg-white shadow-soft" : "border-sand-200 bg-white/80"
+        active
+          ? "border-sand-500 bg-white shadow-soft"
+          : "border-sand-200 bg-white/80"
       }`}
     >
       <div className="flex items-start justify-between gap-4">
@@ -94,16 +117,28 @@ function CounterCard({ title, subtitle, price, count, active = false, onDecrease
           <h4 className="font-display text-3xl leading-none">{title}</h4>
           <p className="mt-2 text-sm text-sand-600">{subtitle}</p>
         </div>
-        <div className="rounded-full bg-sand-50 px-3 py-2 text-sm font-bold text-sand-700">{price}</div>
+        <div className="rounded-full bg-sand-50 px-3 py-2 text-sm font-bold text-sand-700">
+          {price}
+        </div>
       </div>
       <div className="mt-6 flex items-center justify-between gap-4">
         <span className="text-sm font-semibold text-sand-700">Quantity</span>
         <div className="inline-flex items-center gap-4 rounded-full border border-sand-200 bg-sand-50 px-4 py-2">
-          <button type="button" onClick={onDecrease} className="text-lg font-bold text-sand-600">
+          <button
+            type="button"
+            onClick={onDecrease}
+            className="text-lg font-bold text-sand-600"
+          >
             -
           </button>
-          <span className="min-w-6 text-center text-sm font-extrabold text-sand-900">{count}</span>
-          <button type="button" onClick={onIncrease} className="text-lg font-bold text-sand-600">
+          <span className="min-w-6 text-center text-sm font-extrabold text-sand-900">
+            {count}
+          </span>
+          <button
+            type="button"
+            onClick={onIncrease}
+            className="text-lg font-bold text-sand-600"
+          >
             +
           </button>
         </div>
@@ -115,9 +150,19 @@ function CounterCard({ title, subtitle, price, count, active = false, onDecrease
 function CardShell({ eyebrow, title, description, children }) {
   return (
     <div className="rounded-[2rem] border border-sand-200 bg-white/90 p-6 shadow-soft md:p-7">
-      {eyebrow ? <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-sand-700">{eyebrow}</p> : null}
-      <h3 className="mt-3 font-display text-4xl leading-none md:text-5xl">{title}</h3>
-      {description ? <p className="mt-3 max-w-2xl text-sm leading-7 text-sand-700">{description}</p> : null}
+      {eyebrow ? (
+        <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-sand-700">
+          {eyebrow}
+        </p>
+      ) : null}
+      <h3 className="mt-3 font-display text-4xl leading-none md:text-5xl">
+        {title}
+      </h3>
+      {description ? (
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-sand-700">
+          {description}
+        </p>
+      ) : null}
       <div className="mt-6">{children}</div>
     </div>
   );
@@ -159,13 +204,18 @@ export default function BookingPage() {
 
   async function loadSession() {
     try {
-      const response = await fetch("/api/auth/session", { credentials: "same-origin" });
+      const response = await fetch("/api/auth/session", {
+        credentials: "same-origin",
+      });
       const data = await response.json();
 
       if (data.authenticated && data.role === "customer") {
         setCustomer(data.customer);
         setOrders(data.orders || []);
-        setRepeatOrder((current) => ({ ...current, bagCode: data.customer.bagCode || current.bagCode }));
+        setRepeatOrder((current) => ({
+          ...current,
+          bagCode: data.customer.bagCode || current.bagCode,
+        }));
         setFirstOrder((current) => ({
           ...current,
           email: data.customer.email || current.email,
@@ -191,16 +241,35 @@ export default function BookingPage() {
   }
 
   function incrementCount(setter, source) {
-    setter({ ...source, shirtsCount: String(Number(source.shirtsCount || 0) + 1) });
+    setter({
+      ...source,
+      shirtsCount: String(Number(source.shirtsCount || 0) + 1),
+    });
   }
 
   function decrementCount(setter, source) {
-    setter({ ...source, shirtsCount: String(Math.max(0, Number(source.shirtsCount || 0) - 1)) });
+    setter({
+      ...source,
+      shirtsCount: String(Math.max(0, Number(source.shirtsCount || 0) - 1)),
+    });
   }
 
   function validateFirstOrder() {
-    const required = ["email", "password", "firstName", "lastName", "address", "postalCode", "city", "pickupDate", "pickupSlot", "laundryType"];
-    const missing = required.find((field) => !String(firstOrder[field] || "").trim());
+    const required = [
+      "email",
+      "password",
+      "firstName",
+      "lastName",
+      "address",
+      "postalCode",
+      "city",
+      "pickupDate",
+      "pickupSlot",
+      "laundryType",
+    ];
+    const missing = required.find(
+      (field) => !String(firstOrder[field] || "").trim(),
+    );
     if (missing) {
       notify("Please complete the required booking details.", "error");
       return false;
@@ -210,7 +279,9 @@ export default function BookingPage() {
 
   function validateRepeatOrder() {
     const required = ["bagCode", "pickupDate", "pickupSlot", "laundryType"];
-    const missing = required.find((field) => !String(repeatOrder[field] || "").trim());
+    const missing = required.find(
+      (field) => !String(repeatOrder[field] || "").trim(),
+    );
     if (missing) {
       notify("Please complete the repeat pickup details.", "error");
       return false;
@@ -232,7 +303,10 @@ export default function BookingPage() {
 
       setCustomer(data.customer);
       setOrders(data.orders || []);
-      setRepeatOrder((current) => ({ ...current, bagCode: data.customer.bagCode || current.bagCode }));
+      setRepeatOrder((current) => ({
+        ...current,
+        bagCode: data.customer.bagCode || current.bagCode,
+      }));
       notify("Signed in. Your saved bag details are ready.");
       setStep("customize");
     } catch (error) {
@@ -266,7 +340,10 @@ export default function BookingPage() {
       if (data.mode === "login") {
         setCustomer(data.customer);
         setOrders(data.orders || []);
-        setRepeatOrder((current) => ({ ...current, bagCode: data.customer.bagCode || current.bagCode }));
+        setRepeatOrder((current) => ({
+          ...current,
+          bagCode: data.customer.bagCode || current.bagCode,
+        }));
         setFirstOrder((current) => ({
           ...current,
           email: data.customer.email || current.email,
@@ -282,7 +359,10 @@ export default function BookingPage() {
       } else {
         setCustomer(data.customer);
         setOrders(data.orders || []);
-        setRepeatOrder((current) => ({ ...current, bagCode: data.customer.bagCode || current.bagCode }));
+        setRepeatOrder((current) => ({
+          ...current,
+          bagCode: data.customer.bagCode || current.bagCode,
+        }));
         setFirstOrder((current) => ({
           ...current,
           email: data.customer.email || signin.email.trim(),
@@ -310,11 +390,15 @@ export default function BookingPage() {
         body: JSON.stringify(firstOrder),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Unable to create booking");
+      if (!response.ok)
+        throw new Error(data.error || "Unable to create booking");
 
       setResult({ type: "first", ...data });
       setCustomer(data.customer);
-      setRepeatOrder((current) => ({ ...current, bagCode: data.customer.bagCode || current.bagCode }));
+      setRepeatOrder((current) => ({
+        ...current,
+        bagCode: data.customer.bagCode || current.bagCode,
+      }));
       setStep("confirmed");
       await loadSession();
       notify("Pickup booked and invoice created.");
@@ -336,7 +420,8 @@ export default function BookingPage() {
         body: JSON.stringify(repeatOrder),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Unable to create repeat pickup");
+      if (!response.ok)
+        throw new Error(data.error || "Unable to create repeat pickup");
 
       setResult({ type: "repeat", ...data });
       setStep("confirmed");
@@ -350,7 +435,10 @@ export default function BookingPage() {
   }
 
   async function handleSignout() {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "same-origin",
+    });
     setCustomer(null);
     setOrders([]);
     setResult(null);
@@ -371,7 +459,7 @@ export default function BookingPage() {
       async ({ coords }) => {
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}`
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}`,
           );
           if (!response.ok) throw new Error("Reverse geocoding unavailable");
 
@@ -383,7 +471,12 @@ export default function BookingPage() {
               [address.house_number, address.road].filter(Boolean).join(" ") ||
               data.display_name ||
               `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`,
-            city: address.city || address.town || address.village || address.county || "",
+            city:
+              address.city ||
+              address.town ||
+              address.village ||
+              address.county ||
+              "",
             postalCode: address.postcode || "",
           }));
           notify("Live location loaded into your address fields.");
@@ -392,7 +485,9 @@ export default function BookingPage() {
             ...current,
             address: `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`,
           }));
-          notify("Location found. Coordinates were added because address lookup was unavailable.");
+          notify(
+            "Location found. Coordinates were added because address lookup was unavailable.",
+          );
         } finally {
           setLocationLoading(false);
         }
@@ -401,13 +496,14 @@ export default function BookingPage() {
         setLocationLoading(false);
         notify("Unable to access your live location.", "error");
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   }
 
   const activeOrder = mode === "first" ? firstOrder : repeatOrder;
   const customerDisplayName = customer
-    ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || customer.email
+    ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() ||
+      customer.email
     : "";
 
   const summary = useMemo(() => {
@@ -426,7 +522,9 @@ export default function BookingPage() {
       <div className="grid gap-8 xl:grid-cols-[1fr_0.95fr]">
         <CardShell
           title={
-            mode === "first" ? "Start Your Laundry Service" : "Continue Your Laundry Service"
+            mode === "first"
+              ? "Start Your Laundry Service"
+              : "Continue Your Laundry Service"
           }
           description={
             mode === "first"
@@ -438,7 +536,12 @@ export default function BookingPage() {
             <div className="rounded-[1.5rem] bg-gold-pill p-1">
               <button
                 type="button"
-                onClick={() => notify("Google sign-in is not connected yet. Please continue with email.", "error")}
+                onClick={() =>
+                  notify(
+                    "Google sign-in is not connected yet. Please continue with email.",
+                    "error",
+                  )
+                }
                 className="flex w-full items-center justify-center gap-3 rounded-[1.2rem] bg-transparent px-5 py-4 text-base font-extrabold text-white"
               >
                 <span className="text-2xl">G</span>
@@ -469,9 +572,27 @@ export default function BookingPage() {
                 }}
                 className="space-y-4 rounded-[1.6rem] border border-sand-200 bg-sand-50 p-5"
               >
-                <Input label="Email" type="email" value={signin.email} onChange={(e) => setSignin({ ...signin, email: e.target.value })} />
-                <Input label="Password" type="password" value={signin.password} onChange={(e) => setSignin({ ...signin, password: e.target.value })} />
-                <ActionButton type="submit" variant="secondary" disabled={loading.start}>
+                <Input
+                  label="Email"
+                  type="email"
+                  value={signin.email}
+                  onChange={(e) =>
+                    setSignin({ ...signin, email: e.target.value })
+                  }
+                />
+                <Input
+                  label="Password"
+                  type="password"
+                  value={signin.password}
+                  onChange={(e) =>
+                    setSignin({ ...signin, password: e.target.value })
+                  }
+                />
+                <ActionButton
+                  type="submit"
+                  variant="secondary"
+                  disabled={loading.start}
+                >
                   {loading.start ? "Checking account..." : "Continue"}
                 </ActionButton>
               </form>
@@ -479,9 +600,12 @@ export default function BookingPage() {
 
             {mode === "repeat" ? (
               <div className="rounded-[1.6rem] border border-sand-200 bg-sand-50 p-5">
-                <h4 className="font-display text-3xl leading-none">Use your bag code</h4>
+                <h4 className="font-display text-3xl leading-none">
+                  Use your bag code
+                </h4>
                 <p className="mt-3 text-sm leading-7 text-sand-700">
-                  If you prefer not to sign in, continue with your QR-linked bag code in the next step.
+                  If you prefer not to sign in, continue with your QR-linked bag
+                  code in the next step.
                 </p>
               </div>
             ) : (
@@ -489,9 +613,12 @@ export default function BookingPage() {
                 <div className="flex items-start gap-3">
                   <span className="mt-1 text-sand-600">⌘</span>
                   <div>
-                    <h4 className="text-lg font-extrabold text-sand-900">How it works</h4>
+                    <h4 className="text-lg font-extrabold text-sand-900">
+                      How it works
+                    </h4>
                     <p className="mt-2 text-sm leading-7 text-sand-700">
-                      Your personalised QR code links your bag to your account. Just scan, fill, and we handle the rest seamlessly.
+                      Your personalised QR code links your bag to your account.
+                      Just scan, fill, and we handle the rest seamlessly.
                     </p>
                   </div>
                 </div>
@@ -500,12 +627,21 @@ export default function BookingPage() {
 
             <div className="pt-2">
               {mode === "first" ? (
-                <ActionButton onClick={handleAccountStart} disabled={loading.start}>
-                  {loading.start ? "Checking account..." : customer ? "Continue with saved profile" : "Continue to next step"}
+                <ActionButton
+                  onClick={handleAccountStart}
+                  disabled={loading.start}
+                >
+                  {loading.start
+                    ? "Checking account..."
+                    : customer
+                      ? "Continue with saved profile"
+                      : "Continue to next step"}
                 </ActionButton>
               ) : (
                 <ActionButton onClick={() => setStep("customize")}>
-                  {customer ? "Continue with saved profile" : "Continue to next step"}
+                  {customer
+                    ? "Continue with saved profile"
+                    : "Continue to next step"}
                 </ActionButton>
               )}
             </div>
@@ -530,19 +666,25 @@ export default function BookingPage() {
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">
                 ≋
               </div>
-              <p className="mt-3 text-sm font-semibold text-sand-800">No pre-sorting required</p>
+              <p className="mt-3 text-sm font-semibold text-sand-800">
+                No pre-sorting required
+              </p>
             </div>
             <div className="text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">
                 ☐
               </div>
-              <p className="mt-3 text-sm font-semibold text-sand-800">Convenient monthly billing</p>
+              <p className="mt-3 text-sm font-semibold text-sand-800">
+                Convenient monthly billing
+              </p>
             </div>
             <div className="text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">
                 ⇢
               </div>
-              <p className="mt-3 text-sm font-semibold text-sand-800">Pickup directly from your door</p>
+              <p className="mt-3 text-sm font-semibold text-sand-800">
+                Pickup directly from your door
+              </p>
             </div>
           </div>
 
@@ -552,8 +694,14 @@ export default function BookingPage() {
               <strong className="mt-2 block text-lg text-sand-900">
                 {customerDisplayName}
               </strong>
-              <p className="mt-2 text-sm text-sand-700">Bag code: {customer.bagCode}</p>
-              <button type="button" onClick={handleSignout} className="mt-4 text-sm font-extrabold text-sand-700 underline">
+              <p className="mt-2 text-sm text-sand-700">
+                Bag code: {customer.bagCode}
+              </p>
+              <button
+                type="button"
+                onClick={handleSignout}
+                className="mt-4 text-sm font-extrabold text-sand-700 underline"
+              >
                 Sign out
               </button>
             </div>
@@ -583,7 +731,13 @@ export default function BookingPage() {
               title="Continue with your saved bag"
               description="Use your bag code if you are not signed in. If you are already signed in, we will use your saved bag automatically."
             >
-              <Input label="Bag code" value={repeatOrder.bagCode} onChange={(e) => setRepeatOrder({ ...repeatOrder, bagCode: e.target.value })} />
+              <Input
+                label="Bag code"
+                value={repeatOrder.bagCode}
+                onChange={(e) =>
+                  setRepeatOrder({ ...repeatOrder, bagCode: e.target.value })
+                }
+              />
             </CardShell>
           ) : null}
 
@@ -600,12 +754,20 @@ export default function BookingPage() {
                   value={activeOrder.pickupDate}
                   onChange={(e) =>
                     mode === "first"
-                      ? setFirstOrder({ ...firstOrder, pickupDate: e.target.value })
-                      : setRepeatOrder({ ...repeatOrder, pickupDate: e.target.value })
+                      ? setFirstOrder({
+                          ...firstOrder,
+                          pickupDate: e.target.value,
+                        })
+                      : setRepeatOrder({
+                          ...repeatOrder,
+                          pickupDate: e.target.value,
+                        })
                   }
                 />
                 <div className="space-y-2">
-                  <span className="text-sm font-semibold text-sand-700">Time window</span>
+                  <span className="text-sm font-semibold text-sand-700">
+                    Time window
+                  </span>
                   <div className="flex flex-wrap gap-3">
                     {bookingSlots.map((slot) => (
                       <RadioPill
@@ -614,7 +776,10 @@ export default function BookingPage() {
                         onClick={() =>
                           mode === "first"
                             ? setFirstOrder({ ...firstOrder, pickupSlot: slot })
-                            : setRepeatOrder({ ...repeatOrder, pickupSlot: slot })
+                            : setRepeatOrder({
+                                ...repeatOrder,
+                                pickupSlot: slot,
+                              })
                         }
                       >
                         {slot}
@@ -625,7 +790,9 @@ export default function BookingPage() {
               </div>
 
               <div className="space-y-2">
-                <span className="text-sm font-semibold text-sand-700">Laundry type</span>
+                <span className="text-sm font-semibold text-sand-700">
+                  Laundry type
+                </span>
                 <div className="grid gap-4 md:grid-cols-3">
                   {laundryTypes.map((type) => (
                     <LaundryTypeCard
@@ -635,8 +802,14 @@ export default function BookingPage() {
                       description="Standard wash & fold"
                       onClick={() =>
                         mode === "first"
-                          ? setFirstOrder({ ...firstOrder, laundryType: type.value })
-                          : setRepeatOrder({ ...repeatOrder, laundryType: type.value })
+                          ? setFirstOrder({
+                              ...firstOrder,
+                              laundryType: type.value,
+                            })
+                          : setRepeatOrder({
+                              ...repeatOrder,
+                              laundryType: type.value,
+                            })
                       }
                     />
                   ))}
@@ -644,14 +817,22 @@ export default function BookingPage() {
               </div>
 
               <div className="space-y-2">
-                <span className="text-sm font-semibold text-sand-700">Billing plan</span>
+                <span className="text-sm font-semibold text-sand-700">
+                  Billing plan
+                </span>
                 <div className="flex flex-wrap gap-3">
                   <RadioPill
                     active={activeOrder.billingPlan === "single"}
                     onClick={() =>
                       mode === "first"
-                        ? setFirstOrder({ ...firstOrder, billingPlan: "single" })
-                        : setRepeatOrder({ ...repeatOrder, billingPlan: "single" })
+                        ? setFirstOrder({
+                            ...firstOrder,
+                            billingPlan: "single",
+                          })
+                        : setRepeatOrder({
+                            ...repeatOrder,
+                            billingPlan: "single",
+                          })
                     }
                   >
                     Standard laundry bag • CHF 55
@@ -660,8 +841,14 @@ export default function BookingPage() {
                     active={activeOrder.billingPlan === "subscription"}
                     onClick={() =>
                       mode === "first"
-                        ? setFirstOrder({ ...firstOrder, billingPlan: "subscription" })
-                        : setRepeatOrder({ ...repeatOrder, billingPlan: "subscription" })
+                        ? setFirstOrder({
+                            ...firstOrder,
+                            billingPlan: "subscription",
+                          })
+                        : setRepeatOrder({
+                            ...repeatOrder,
+                            billingPlan: "subscription",
+                          })
                     }
                   >
                     Premium plan • CHF 50
@@ -692,14 +879,18 @@ export default function BookingPage() {
                   <div className="flex items-start gap-3">
                     <span className="mt-1 text-sand-600">⌁</span>
                     <div>
-                      <h4 className="font-display text-3xl leading-none">Smart Pickup</h4>
+                      <h4 className="font-display text-3xl leading-none">
+                        Smart Pickup
+                      </h4>
                       <p className="mt-2 text-sm leading-7 text-sand-600">
-                        Your bag is automatically recognised. No repeated address entry is needed for future pickups.
+                        Your bag is automatically recognised. No repeated
+                        address entry is needed for future pickups.
                       </p>
                     </div>
                   </div>
                   <div className="mt-6 rounded-[1.2rem] bg-sand-50 px-4 py-4 text-sm text-sand-700">
-                    Clean repeat UX with one bag identity, one account, and one monthly billing flow.
+                    Clean repeat UX with one bag identity, one account, and one
+                    monthly billing flow.
                   </div>
                 </article>
               </div>
@@ -724,14 +915,28 @@ export default function BookingPage() {
               description="Now that the order is customized, finish the collection profile and address details."
             >
               <div className="grid gap-4 md:grid-cols-2">
-                <Input label="First name" value={firstOrder.firstName} onChange={(e) => setFirstOrder({ ...firstOrder, firstName: e.target.value })} />
-                <Input label="Last name" value={firstOrder.lastName} onChange={(e) => setFirstOrder({ ...firstOrder, lastName: e.target.value })} />
+                <Input
+                  label="First name"
+                  value={firstOrder.firstName}
+                  onChange={(e) =>
+                    setFirstOrder({ ...firstOrder, firstName: e.target.value })
+                  }
+                />
+                <Input
+                  label="Last name"
+                  value={firstOrder.lastName}
+                  onChange={(e) =>
+                    setFirstOrder({ ...firstOrder, lastName: e.target.value })
+                  }
+                />
                 <div className="md:col-span-2 flex flex-wrap items-end gap-3">
                   <Input
                     label="Address"
                     className="min-w-[260px] flex-1"
                     value={firstOrder.address}
-                    onChange={(e) => setFirstOrder({ ...firstOrder, address: e.target.value })}
+                    onChange={(e) =>
+                      setFirstOrder({ ...firstOrder, address: e.target.value })
+                    }
                   />
                   <button
                     type="button"
@@ -742,9 +947,28 @@ export default function BookingPage() {
                     {locationLoading ? "Locating..." : "Use live location"}
                   </button>
                 </div>
-                <Input label="Postal code" value={firstOrder.postalCode} onChange={(e) => setFirstOrder({ ...firstOrder, postalCode: e.target.value })} />
-                <Input label="City" value={firstOrder.city} onChange={(e) => setFirstOrder({ ...firstOrder, city: e.target.value })} />
-                <Input label="Phone" className="md:col-span-2" value={firstOrder.phone} onChange={(e) => setFirstOrder({ ...firstOrder, phone: e.target.value })} />
+                <Input
+                  label="Postal code"
+                  value={firstOrder.postalCode}
+                  onChange={(e) =>
+                    setFirstOrder({ ...firstOrder, postalCode: e.target.value })
+                  }
+                />
+                <Input
+                  label="City"
+                  value={firstOrder.city}
+                  onChange={(e) =>
+                    setFirstOrder({ ...firstOrder, city: e.target.value })
+                  }
+                />
+                <Input
+                  label="Phone"
+                  className="md:col-span-2"
+                  value={firstOrder.phone}
+                  onChange={(e) =>
+                    setFirstOrder({ ...firstOrder, phone: e.target.value })
+                  }
+                />
               </div>
             </CardShell>
           ) : null}
@@ -752,17 +976,39 @@ export default function BookingPage() {
 
         <div className="space-y-6">
           <div className="rounded-[2rem] border border-sand-200 bg-white/92 p-6 shadow-glow">
-            <h3 className="font-display text-4xl leading-none">Your Order Summary</h3>
+            <h3 className="font-display text-4xl leading-none">
+              Your Order Summary
+            </h3>
             <div className="mt-5 space-y-4 border-t border-sand-100 pt-5">
-              <SummaryRow label={activeOrder.billingPlan === "subscription" ? "Premium laundry plan" : "Standard laundry bag"} value={formatCurrency(summary.base)} />
-              <SummaryRow label={`Shirts / Blouses x ${activeOrder.shirtsCount || 0}`} value={formatCurrency(summary.shirts)} />
+              <SummaryRow
+                label={
+                  activeOrder.billingPlan === "subscription"
+                    ? "Premium laundry plan"
+                    : "Standard laundry bag"
+                }
+                value={formatCurrency(summary.base)}
+              />
+              <SummaryRow
+                label={`Shirts / Blouses x ${activeOrder.shirtsCount || 0}`}
+                value={formatCurrency(summary.shirts)}
+              />
             </div>
             <div className="mt-8 border-t border-sand-100 pt-5">
-              <SummaryRow label="Total" value={formatCurrency(summary.total)} strong />
+              <SummaryRow
+                label="Total"
+                value={formatCurrency(summary.total)}
+                strong
+              />
             </div>
             <div className="mt-6 flex flex-col gap-3">
-              <ActionButton onClick={() => setStep("review")}>Continue to Next Step</ActionButton>
-              <button type="button" onClick={() => setStep("auth")} className="text-sm font-semibold text-sand-500">
+              <ActionButton onClick={() => setStep("review")}>
+                Continue to Next Step
+              </ActionButton>
+              <button
+                type="button"
+                onClick={() => setStep("auth")}
+                className="text-sm font-semibold text-sand-500"
+              >
                 Back
               </button>
             </div>
@@ -781,9 +1027,12 @@ export default function BookingPage() {
             <div className="flex items-start gap-3">
               <span className="mt-1 text-sand-600">⌘</span>
               <div>
-                <h4 className="font-display text-3xl leading-none">Smart Pickup</h4>
+                <h4 className="font-display text-3xl leading-none">
+                  Smart Pickup
+                </h4>
                 <p className="mt-2 text-sm leading-7 text-sand-700">
-                  Your bag is automatically recognised. No repeated address entry is needed.
+                  Your bag is automatically recognised. No repeated address
+                  entry is needed.
                 </p>
               </div>
             </div>
@@ -791,13 +1040,21 @@ export default function BookingPage() {
 
           {orders.length ? (
             <div className="rounded-[2rem] border border-sand-200 bg-white/88 p-6 shadow-soft">
-              <h4 className="font-display text-3xl leading-none">Recent orders</h4>
+              <h4 className="font-display text-3xl leading-none">
+                Recent orders
+              </h4>
               <div className="mt-5 space-y-3">
                 {orders.slice(0, 3).map((order) => (
-                  <article key={order.id} className="rounded-[1.4rem] border border-sand-200 bg-sand-50 p-4 text-sm">
-                    <small className="block text-sand-600">{order.invoice_number}</small>
+                  <article
+                    key={order.id}
+                    className="rounded-[1.4rem] border border-sand-200 bg-sand-50 p-4 text-sm"
+                  >
+                    <small className="block text-sand-600">
+                      {order.invoice_number}
+                    </small>
                     <strong className="mt-2 block text-sand-900">
-                      {formatPickupDate(order.pickup_date)} • {order.pickup_slot}
+                      {formatPickupDate(order.pickup_date)} •{" "}
+                      {order.pickup_slot}
                     </strong>
                   </article>
                 ))}
@@ -831,24 +1088,36 @@ export default function BookingPage() {
               </article>
               <article className="rounded-[1.6rem] border border-sand-200 bg-sand-50 p-5">
                 <small className="block text-sand-600">Pickup date</small>
-                <strong className="mt-2 block text-sand-900">{formatPickupDate(activeOrder.pickupDate)}</strong>
+                <strong className="mt-2 block text-sand-900">
+                  {formatPickupDate(activeOrder.pickupDate)}
+                </strong>
               </article>
               <article className="rounded-[1.6rem] border border-sand-200 bg-sand-50 p-5">
                 <small className="block text-sand-600">Time window</small>
-                <strong className="mt-2 block text-sand-900">{activeOrder.pickupSlot}</strong>
+                <strong className="mt-2 block text-sand-900">
+                  {activeOrder.pickupSlot}
+                </strong>
               </article>
               <article className="rounded-[1.6rem] border border-sand-200 bg-sand-50 p-5">
                 <small className="block text-sand-600">Laundry type</small>
-                <strong className="mt-2 block text-sand-900">{capitalize(activeOrder.laundryType)}</strong>
+                <strong className="mt-2 block text-sand-900">
+                  {capitalize(activeOrder.laundryType)}
+                </strong>
               </article>
               <article className="rounded-[1.6rem] border border-sand-200 bg-sand-50 p-5 md:col-span-2">
                 <small className="block text-sand-600">Return delivery</small>
-                <strong className="mt-2 block text-sand-900">Friday between 6:00 PM and 9:00 PM</strong>
+                <strong className="mt-2 block text-sand-900">
+                  Friday between 6:00 PM and 9:00 PM
+                </strong>
               </article>
             </div>
           </CardShell>
 
-          <CardShell eyebrow="Items" title="Selected items" description="Adjust anything one last time before confirming.">
+          <CardShell
+            eyebrow="Items"
+            title="Selected items"
+            description="Adjust anything one last time before confirming."
+          >
             <div className="grid gap-4 md:grid-cols-2">
               <CounterCard
                 title="Shirts / Blouses"
@@ -881,9 +1150,33 @@ export default function BookingPage() {
 
           <CardShell title="Confirmation">
             <div className="space-y-3 text-sm text-sand-700">
-              <label className="flex items-start gap-3"><input type="checkbox" defaultChecked readOnly className="mt-1" /> I accept the pickup details and billing flow.</label>
-              <label className="flex items-start gap-3"><input type="checkbox" defaultChecked readOnly className="mt-1" /> I confirm the bag contains standard machine-washable laundry.</label>
-              <label className="flex items-start gap-3"><input type="checkbox" defaultChecked readOnly className="mt-1" /> I understand return will happen within the announced window.</label>
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  readOnly
+                  className="mt-1"
+                />{" "}
+                I accept the pickup details and billing flow.
+              </label>
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  readOnly
+                  className="mt-1"
+                />{" "}
+                I confirm the bag contains standard machine-washable laundry.
+              </label>
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  readOnly
+                  className="mt-1"
+                />{" "}
+                I understand return will happen within the announced window.
+              </label>
             </div>
           </CardShell>
         </div>
@@ -901,9 +1194,23 @@ export default function BookingPage() {
 
           <CardShell title="Billing Info">
             <div className="space-y-4">
-              <SummaryRow label={activeOrder.billingPlan === "subscription" ? "Premium plan" : "Standard laundry bag"} value={formatCurrency(summary.base)} />
-              <SummaryRow label={`Shirts / Blouses x ${activeOrder.shirtsCount || 0}`} value={formatCurrency(summary.shirts)} />
-              <SummaryRow label="Estimated total" value={formatCurrency(summary.total)} strong />
+              <SummaryRow
+                label={
+                  activeOrder.billingPlan === "subscription"
+                    ? "Premium plan"
+                    : "Standard laundry bag"
+                }
+                value={formatCurrency(summary.base)}
+              />
+              <SummaryRow
+                label={`Shirts / Blouses x ${activeOrder.shirtsCount || 0}`}
+                value={formatCurrency(summary.shirts)}
+              />
+              <SummaryRow
+                label="Estimated total"
+                value={formatCurrency(summary.total)}
+                strong
+              />
             </div>
             <p className="mt-5 text-sm leading-7 text-sand-600">
               Billing will be calculated in CHF and sent via email after pickup.
@@ -942,7 +1249,11 @@ export default function BookingPage() {
                   ? "Schedule pickup"
                   : "Schedule Pickup"}
             </ActionButton>
-            <button type="button" onClick={() => setStep("customize")} className="text-sm font-semibold text-sand-500">
+            <button
+              type="button"
+              onClick={() => setStep("customize")}
+              className="text-sm font-semibold text-sand-500"
+            >
               Edit details
             </button>
           </div>
@@ -961,8 +1272,12 @@ export default function BookingPage() {
             <div className="rounded-full border border-sand-200 bg-sand-50 p-6">
               <span className="font-display text-5xl text-sand-600">✓</span>
             </div>
-            <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.24em] text-sand-700">laundry.li</p>
-            <h2 className="mt-3 font-display text-5xl leading-none md:text-6xl">Pickup Confirmed</h2>
+            <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.24em] text-sand-700">
+              laundry.li
+            </p>
+            <h2 className="mt-3 font-display text-5xl leading-none md:text-6xl">
+              Pickup Confirmed
+            </h2>
             <p className="mt-4 max-w-2xl text-base leading-8 text-sand-700">
               Your laundry bag will be picked up as scheduled.
             </p>
@@ -970,9 +1285,15 @@ export default function BookingPage() {
 
           <div className="mx-auto mt-10 max-w-2xl rounded-[1.8rem] border border-sand-200 bg-sand-50 p-5">
             <div className="space-y-4">
-              <SummaryRow label="Pickup Date" value={formatPickupDate(result.order.pickupDate)} />
+              <SummaryRow
+                label="Pickup Date"
+                value={formatPickupDate(result.order.pickupDate)}
+              />
               <SummaryRow label="Time Window" value={result.order.pickupSlot} />
-              <SummaryRow label="Return Info" value={result.order.returnWindow} />
+              <SummaryRow
+                label="Return Info"
+                value={result.order.returnWindow}
+              />
             </div>
           </div>
 
@@ -988,19 +1309,33 @@ export default function BookingPage() {
           ) : null}
 
           <div className="mx-auto mt-10 max-w-2xl">
-            <h3 className="text-center font-display text-4xl leading-none">What You Need To Do Next</h3>
+            <h3 className="text-center font-display text-4xl leading-none">
+              What You Need To Do Next
+            </h3>
             <div className="mt-6 space-y-4">
               <div className="flex items-center gap-4 border-b border-sand-100 pb-4">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">1</span>
-                <span className="text-base text-sand-800">Fill your laundry bag</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">
+                  1
+                </span>
+                <span className="text-base text-sand-800">
+                  Fill your laundry bag
+                </span>
               </div>
               <div className="flex items-center gap-4 border-b border-sand-100 pb-4">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">2</span>
-                <span className="text-base text-sand-800">Place it outside your door tomorrow</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">
+                  2
+                </span>
+                <span className="text-base text-sand-800">
+                  Place it outside your door tomorrow
+                </span>
               </div>
               <div className="flex items-center gap-4 pb-4">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">3</span>
-                <span className="text-base text-sand-800">We will take care of the rest</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-sand-200 bg-sand-50 text-sand-700">
+                  3
+                </span>
+                <span className="text-base text-sand-800">
+                  We will take care of the rest
+                </span>
               </div>
             </div>
 
@@ -1023,7 +1358,10 @@ export default function BookingPage() {
             >
               Schedule Another Pickup
             </button>
-            <Link href="/" className="text-center text-sm font-semibold text-sand-600">
+            <Link
+              href="/"
+              className="text-center text-sm font-semibold text-sand-600"
+            >
               Back to Home
             </Link>
           </div>
@@ -1076,16 +1414,39 @@ export default function BookingPage() {
           <RadioPill active={mode === "first"} onClick={() => setMode("first")}>
             First order
           </RadioPill>
-          <RadioPill active={mode === "repeat"} onClick={() => setMode("repeat")}>
+          <RadioPill
+            active={mode === "repeat"}
+            onClick={() => setMode("repeat")}
+          >
             Repeat pickup
           </RadioPill>
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <StepPill number="1" label="Account" active={step === "auth"} complete={stepIndex > 0} />
-          <StepPill number="2" label="Customize" active={step === "customize"} complete={stepIndex > 1} />
-          <StepPill number="3" label="Review" active={step === "review"} complete={stepIndex > 2} />
-          <StepPill number="4" label="Confirmed" active={step === "confirmed"} complete={stepIndex > 3} />
+          <StepPill
+            number="1"
+            label="Account"
+            active={step === "auth"}
+            complete={stepIndex > 0}
+          />
+          <StepPill
+            number="2"
+            label="Customize"
+            active={step === "customize"}
+            complete={stepIndex > 1}
+          />
+          <StepPill
+            number="3"
+            label="Review"
+            active={step === "review"}
+            complete={stepIndex > 2}
+          />
+          <StepPill
+            number="4"
+            label="Confirmed"
+            active={step === "confirmed"}
+            complete={stepIndex > 3}
+          />
         </div>
 
         <div className="mt-10">
@@ -1095,6 +1456,7 @@ export default function BookingPage() {
           {step === "confirmed" ? renderConfirmedStep() : null}
         </div>
       </main>
+      <Footer />
 
       <Toast toast={toast} />
     </div>

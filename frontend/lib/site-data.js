@@ -1,45 +1,52 @@
 export const services = [
   {
-    title: "Wash",
-    description: "Thoughtful everyday cleaning for regular weekly laundry and home essentials.",
+    title: "Washing",
+    description:
+      "Deep cleaning for your daily clothes. We sort by color and fabric type to ensure perfect results.",
   },
   {
-    title: "Dry",
-    description: "Handled gently as part of the full-service flow before return and packing.",
+    title: "Drying",
+    description:
+      "Gentle drying, ready for the day. Temperature-controlled cycles protect your garments from shrinking.",
   },
   {
-    title: "Iron",
-    description: "Shirts and blouses can be added as a separate item-based finishing service.",
+    title: "Ironing",
+    description:
+      "Perfectly pressed for a professional look. Hand-finished detailing for crisp collars and cuffs.",
   },
   {
-    title: "Fold",
-    description: "Returned neatly folded so the bag feels ready to unpack the moment it arrives.",
+    title: "Folding",
+    description:
+      "Neatly folded and ready to be put away. Marie Kondo-style folding available upon request.",
   },
 ];
 
 export const rules = [
   {
-    title: "Prepare your laundry",
+    title: "Prepare Your Laundry",
+    type: "check",
     items: [
-      "Separate white, dark, and colored items.",
-      "Use the bag for normal everyday laundry only.",
-      "Do not overfill the bag.",
+      "Not sorted, but pre-washed if needed",
+      "Remove delicate items",
+      "Check pockets for loose items",
     ],
   },
   {
-    title: "Important to know",
+    title: "What You Should Know",
+    type: "check",
     items: [
-      "Laundry is washed as handed over.",
-      "Individual garments are not re-sorted.",
-      "Mixed bags are washed together.",
+      "No liability for valuables left in pockets",
+      "Report special care instructions beforehand",
+      "Check clothing labels for washability",
     ],
   },
   {
-    title: "Not accepted",
+    title: "Not Accepted",
+    type: "cross",
     items: [
-      "Silk, wool, leather, or delicate specialty care pieces.",
-      "Curtains, bulky bedding, and oversized home textiles.",
-      "Very dirty garments that need stain-by-stain treatment.",
+      "Silk, wool, leather garments",
+      "Curtains, carpets, large bedding",
+      "Heavily stained or damaged items",
     ],
   },
 ];
@@ -47,7 +54,8 @@ export const rules = [
 export const processSteps = [
   {
     title: "Scan your bag",
-    description: "Your QR-linked laundry bag identifies your account in seconds.",
+    description:
+      "Your QR-linked laundry bag identifies your account in seconds.",
   },
   {
     title: "Choose a time window",
@@ -55,11 +63,13 @@ export const processSteps = [
   },
   {
     title: "Place it by the door",
-    description: "Leave the bag outside in the morning for scheduled collection.",
+    description:
+      "Leave the bag outside in the morning for scheduled collection.",
   },
   {
     title: "Receive it back clean",
-    description: "Your laundry returns washed, finished, and folded within 48 hours.",
+    description:
+      "Your laundry returns washed, finished, and folded within 48 hours.",
   },
 ];
 
@@ -70,4 +80,3 @@ export const laundryTypes = [
   { value: "dark", label: "Dark" },
   { value: "color", label: "Color" },
 ];
-

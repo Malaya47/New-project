@@ -1,3 +1,4 @@
+require("dotenv").config();
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -5,9 +6,11 @@ const { URL } = require("url");
 const crypto = require("crypto");
 const { execFileSync } = require("child_process");
 const QRCode = require("qrcode");
+const { sendOrderConfirmation, sendStatusUpdate } = require("./mailer");
 
 const HOST = process.env.HOST || "127.0.0.1";
-const PORT = Number(process.env.PORT || 4000);
+const PORT = Number(process.env.PORT || 5000);
+const APP_BASE_URL = process.env.APP_BASE_URL || "https://laundry.li";
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, "..", "data");
 const DB_PATH = path.join(DATA_DIR, "laundry.sqlite");
@@ -16,7 +19,13 @@ const DEFAULT_RETURN_WINDOW = "Within 48 hours between 6:00 PM and 9:00 PM";
 const DEFAULT_BILLING_PLAN = "single";
 const ADMIN_EMAIL = "admin@laundry.li";
 const ADMIN_PASSWORD = "LaundryAdmin123!";
-const ORDER_STATUSES = ["scheduled", "picked_up", "processing", "returning", "completed"];
+const ORDER_STATUSES = [
+  "scheduled",
+  "picked_up",
+  "processing",
+  "returning",
+  "completed",
+];
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -40,7 +49,7 @@ function dbGet(sql) {
     ["-json", "-cmd", ".timeout 5000", DB_PATH, sql],
     {
       encoding: "utf8",
-    }
+    },
   );
 
   return output.trim() ? JSON.parse(output) : [];
@@ -67,7 +76,10 @@ function verifyPassword(password, passwordHash) {
   if (!salt || !hash) return false;
 
   const derived = crypto.scryptSync(password, salt, 64).toString("hex");
-  return crypto.timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(derived, "hex"));
+  return crypto.timingSafeEqual(
+    Buffer.from(hash, "hex"),
+    Buffer.from(derived, "hex"),
+  );
 }
 
 function parseCookies(req) {
@@ -177,7 +189,7 @@ function initDatabase() {
 
 function seedAdmin() {
   const existing = dbGet(
-    `SELECT id FROM admins WHERE email = ${sqlEscape(ADMIN_EMAIL)} LIMIT 1;`
+    `SELECT id FROM admins WHERE email = ${sqlEscape(ADMIN_EMAIL)} LIMIT 1;`,
   )[0];
 
   if (!existing) {
@@ -212,7 +224,8 @@ function normalizeLabel(value) {
 }
 
 function calculateAmounts(shirtsCount, billingPlan = DEFAULT_BILLING_PLAN) {
-  const normalizedPlan = billingPlan === "subscription" ? "subscription" : "single";
+  const normalizedPlan =
+    billingPlan === "subscription" ? "subscription" : "single";
   const baseAmount = normalizedPlan === "subscription" ? 50 : 55;
   const addOnAmount = Number(shirtsCount || 0) * 4;
   const amount = baseAmount + addOnAmount;
@@ -585,7 +598,10 @@ function getOrderRecord(orderId) {
 }
 
 function buildInvoiceRecordFromRow(row) {
-  const { baseAmount, addOnAmount } = calculateAmounts(row.shirts_count, row.billing_plan);
+  const { baseAmount, addOnAmount } = calculateAmounts(
+    row.shirts_count,
+    row.billing_plan,
+  );
   return {
     invoiceNumber: row.invoice_number,
     createdAt: new Date(row.created_at).toLocaleDateString("en-IN", {
@@ -638,7 +654,9 @@ function parseBody(req) {
 }
 
 function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json; charset=utf-8",
+  });
   res.end(JSON.stringify(payload));
 }
 
@@ -744,7 +762,7 @@ function getAdminByEmail(email) {
 
 async function createBagIdentity() {
   const bagCode = `LB-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
-  const qrPayload = `laundry.li/bag/${bagCode}`;
+  const qrPayload = `${APP_BASE_URL}/bag/${bagCode}`;
   const qrSvg = await QRCode.toString(qrPayload, {
     type: "svg",
     margin: 1,
@@ -807,7 +825,7 @@ function buildOrderPayload({ customer, body }) {
   const shirtsCount = Number(body.shirtsCount || 0);
   const { baseAmount, addOnAmount, amount, billingPlan } = calculateAmounts(
     shirtsCount,
-    body.billingPlan || DEFAULT_BILLING_PLAN
+    body.billingPlan || DEFAULT_BILLING_PLAN,
   );
   const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
   const now = new Date().toISOString();
@@ -953,8 +971,14 @@ async function handleRegister(req, res) {
     let customer = getCustomerByEmail(email);
     const now = new Date().toISOString();
 
-    if (customer && customer.password_hash && !verifyPassword(body.password, customer.password_hash)) {
-      sendJson(res, 400, { error: "An account with this email already exists. Please sign in." });
+    if (
+      customer &&
+      customer.password_hash &&
+      !verifyPassword(body.password, customer.password_hash)
+    ) {
+      sendJson(res, 400, {
+        error: "An account with this email already exists. Please sign in.",
+      });
       return;
     }
 
@@ -996,22 +1020,32 @@ async function handleRegister(req, res) {
     const order = insertOrder(customer.id, body, customer);
     createSession(res, "customer", customer.id);
 
+    const serialized = serializeCustomer(customer);
+    const orderPayload = {
+      id: order.orderId,
+      invoiceNumber: order.invoiceNumber,
+      invoiceUrl: order.invoiceUrl,
+      amount: formatMoney(order.amount),
+      billingPlan: order.billingPlan,
+      pickupDate: order.pickupDate,
+      pickupSlot: order.pickupSlot,
+      laundryType: order.laundryType,
+      shirtsCount: order.shirtsCount,
+      returnWindow: order.returnWindow,
+      status: order.status,
+    };
+
     sendJson(res, 201, {
       success: true,
       mode: "registered",
-      customer: serializeCustomer(customer),
-      order: {
-        id: order.orderId,
-        invoiceNumber: order.invoiceNumber,
-        invoiceUrl: order.invoiceUrl,
-        amount: formatMoney(order.amount),
-        billingPlan: order.billingPlan,
-        pickupDate: order.pickupDate,
-        pickupSlot: order.pickupSlot,
-        returnWindow: order.returnWindow,
-        status: order.status,
-      },
+      customer: serialized,
+      order: orderPayload,
     });
+
+    // fire-and-forget emails
+    sendOrderConfirmation({ customer: serialized, order: orderPayload }).catch(
+      console.error,
+    );
   } catch (error) {
     console.error(error);
     sendJson(res, 500, { error: "Unable to create registration" });
@@ -1041,7 +1075,9 @@ async function handleSignup(req, res) {
     const email = String(body.email).trim().toLowerCase();
     const existingCustomer = getCustomerByEmail(email);
     if (existingCustomer) {
-      sendJson(res, 400, { error: "An account with this email already exists. Please sign in." });
+      sendJson(res, 400, {
+        error: "An account with this email already exists. Please sign in.",
+      });
       return;
     }
 
@@ -1112,7 +1148,9 @@ async function handleCustomerLogin(req, res) {
 async function handleCustomerStart(req, res) {
   try {
     const body = await parseBody(req);
-    const email = String(body.email || "").trim().toLowerCase();
+    const email = String(body.email || "")
+      .trim()
+      .toLowerCase();
     const password = String(body.password || "");
 
     if (!email || !password) {
@@ -1253,7 +1291,9 @@ async function handleRepeatPickup(req, res) {
     }
 
     if (!customer) {
-      sendJson(res, 404, { error: "Bag code not found. Please register first." });
+      sendJson(res, 404, {
+        error: "Bag code not found. Please register first.",
+      });
       return;
     }
 
@@ -1266,21 +1306,41 @@ async function handleRepeatPickup(req, res) {
     }
 
     const order = insertOrder(customer.id, body, customer);
+    const serializedRepeat = serializeCustomer(customer);
+    const repeatOrderPayload = {
+      id: order.orderId,
+      invoiceNumber: order.invoiceNumber,
+      invoiceUrl: order.invoiceUrl,
+      amount: formatMoney(order.amount),
+      billingPlan: order.billingPlan,
+      pickupDate: order.pickupDate,
+      pickupSlot: order.pickupSlot,
+      laundryType: order.laundryType,
+      shirtsCount: order.shirtsCount,
+      returnWindow: order.returnWindow,
+      status: order.status,
+    };
     sendJson(res, 201, {
       success: true,
-      customer: serializeCustomer(customer),
+      customer: serializedRepeat,
       order: {
-        id: order.orderId,
-        invoiceNumber: order.invoiceNumber,
-        invoiceUrl: order.invoiceUrl,
-        amount: formatMoney(order.amount),
-        billingPlan: order.billingPlan,
-        pickupDate: order.pickupDate,
-        pickupSlot: order.pickupSlot,
-        returnWindow: order.returnWindow,
-        status: order.status,
+        id: repeatOrderPayload.orderId,
+        invoiceNumber: repeatOrderPayload.invoiceNumber,
+        invoiceUrl: repeatOrderPayload.invoiceUrl,
+        amount: repeatOrderPayload.amount,
+        billingPlan: repeatOrderPayload.billingPlan,
+        pickupDate: repeatOrderPayload.pickupDate,
+        pickupSlot: repeatOrderPayload.pickupSlot,
+        returnWindow: repeatOrderPayload.returnWindow,
+        status: repeatOrderPayload.status,
       },
     });
+
+    // fire-and-forget emails
+    sendOrderConfirmation({
+      customer: serializedRepeat,
+      order: repeatOrderPayload,
+    }).catch(console.error);
   } catch (error) {
     console.error(error);
     sendJson(res, 500, { error: "Unable to create repeat pickup" });
@@ -1404,6 +1464,25 @@ async function handleOrderStatusUpdate(req, res, orderId) {
             invoice_text = ${sqlEscape(createInvoiceText(invoiceRecord))}
         WHERE id = ${sqlEscape(orderId)};
       `);
+
+      // notify the customer of their status change
+      sendStatusUpdate({
+        customer: {
+          firstName: row.first_name,
+          email: row.email,
+        },
+        order: {
+          invoiceNumber: row.invoice_number,
+          pickupDate: row.pickup_date,
+          pickupSlot: row.pickup_slot,
+          laundryType: row.laundry_type,
+          shirtsCount: row.shirts_count,
+          amount: formatMoney(row.amount),
+          billingPlan: row.billing_plan,
+          returnWindow: row.return_window || DEFAULT_RETURN_WINDOW,
+        },
+        status,
+      }).catch(console.error);
     }
 
     sendJson(res, 200, { success: true, overview: getAdminOverviewData() });
@@ -1450,10 +1529,16 @@ function handleInvoiceText(req, res, orderId) {
 initDatabase();
 
 const server = http.createServer((req, res) => {
-  const requestUrl = new URL(req.url, `http://${req.headers.host || `localhost:${PORT}`}`);
+  const requestUrl = new URL(
+    req.url,
+    `http://${req.headers.host || `localhost:${PORT}`}`,
+  );
   const pathname = requestUrl.pathname;
 
-  if (req.method === "POST" && (pathname === "/api/register" || pathname === "/api/auth/register")) {
+  if (
+    req.method === "POST" &&
+    (pathname === "/api/register" || pathname === "/api/auth/register")
+  ) {
     handleRegister(req, res);
     return;
   }
@@ -1503,8 +1588,96 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (req.method === "GET" && pathname === "/api/admin/customers") {
+    const session = requireSession(req, res, "admin");
+    if (!session) return;
+    try {
+      const rows = dbGet(`
+        SELECT
+          c.id,
+          c.first_name,
+          c.last_name,
+          c.email,
+          c.city,
+          c.address,
+          c.postal_code,
+          c.phone,
+          c.bag_code,
+          c.qr_svg,
+          c.status,
+          c.created_at,
+          COUNT(o.id) AS order_count,
+          COALESCE(SUM(o.amount), 0) AS total_spent
+        FROM customers c
+        LEFT JOIN orders o ON o.customer_id = c.id
+        GROUP BY c.id
+        ORDER BY c.created_at DESC;
+      `);
+      sendJson(res, 200, rows);
+    } catch (err) {
+      console.error(err);
+      sendJson(res, 500, { error: "Unable to fetch customers" });
+    }
+    return;
+  }
+
+  if (
+    req.method === "GET" &&
+    pathname.startsWith("/api/admin/customers/") &&
+    pathname.endsWith("/orders")
+  ) {
+    const session = requireSession(req, res, "admin");
+    if (!session) return;
+    try {
+      const customerId = pathname
+        .replace("/api/admin/customers/", "")
+        .replace("/orders", "");
+      const customer = getCustomerById(customerId);
+      if (!customer) {
+        sendJson(res, 404, { error: "Customer not found" });
+        return;
+      }
+      const orders = dbGet(`
+        SELECT
+          id, invoice_number, pickup_date, pickup_slot, laundry_type,
+          shirts_count, notes, amount, status,
+          COALESCE(billing_plan, '${DEFAULT_BILLING_PLAN}') AS billing_plan,
+          created_at
+        FROM orders
+        WHERE customer_id = ${sqlEscape(customerId)}
+        ORDER BY created_at DESC;
+      `);
+      sendJson(res, 200, {
+        customer: {
+          id: customer.id,
+          email: customer.email,
+          firstName: customer.first_name,
+          lastName: customer.last_name,
+          address: customer.address,
+          postalCode: customer.postal_code,
+          city: customer.city,
+          phone: customer.phone,
+          bagCode: customer.bag_code,
+          qrSvg: customer.qr_svg,
+          status: customer.status,
+          createdAt: customer.created_at,
+        },
+        orders,
+        statusOptions: ORDER_STATUSES,
+      });
+    } catch (err) {
+      console.error(err);
+      sendJson(res, 500, { error: "Unable to fetch customer orders" });
+    }
+    return;
+  }
+
   if (req.method === "POST" && pathname.startsWith("/api/admin/orders/")) {
-    handleOrderStatusUpdate(req, res, pathname.replace("/api/admin/orders/", ""));
+    handleOrderStatusUpdate(
+      req,
+      res,
+      pathname.replace("/api/admin/orders/", ""),
+    );
     return;
   }
 
@@ -1515,6 +1688,24 @@ const server = http.createServer((req, res) => {
 
   if (req.method === "GET" && pathname.startsWith("/invoice/")) {
     handleInvoice(req, res, pathname.replace("/invoice/", ""));
+    return;
+  }
+
+  if (req.method === "GET" && pathname.startsWith("/api/bag/")) {
+    const code = pathname.replace("/api/bag/", "").trim().toUpperCase();
+    const customer = getCustomerByBagCode(code);
+    if (!customer) {
+      sendJson(res, 404, { error: "Bag code not found." });
+      return;
+    }
+    sendJson(res, 200, {
+      bagCode: customer.bag_code,
+      firstName: customer.first_name,
+      lastName: customer.last_name,
+      address: customer.address,
+      postalCode: customer.postal_code,
+      city: customer.city,
+    });
     return;
   }
 
