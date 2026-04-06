@@ -343,7 +343,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer select-none">
                   <input
                     type="checkbox"
@@ -351,7 +351,7 @@ export default function AdminPage() {
                   />
                   Remember me
                 </label>
-              </div>
+              </div> */}
 
               <button
                 type="submit"
