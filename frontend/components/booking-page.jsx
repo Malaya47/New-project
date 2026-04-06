@@ -257,7 +257,7 @@ export default function BookingPage() {
   function validateFirstOrder() {
     const required = [
       "email",
-      "password",
+      ...(customer ? [] : ["password"]),
       "firstName",
       "lastName",
       "address",
@@ -907,7 +907,9 @@ export default function BookingPage() {
               />
             </div>
           </CardShell>
+        </div>
 
+        <div className="space-y-6">
           {mode === "first" ? (
             <CardShell
               eyebrow="Collection details"
@@ -972,9 +974,7 @@ export default function BookingPage() {
               </div>
             </CardShell>
           ) : null}
-        </div>
 
-        <div className="space-y-6">
           <div className="rounded-[2rem] border border-sand-200 bg-white/92 p-6 shadow-glow">
             <h3 className="font-display text-4xl leading-none">
               Your Order Summary
@@ -1014,53 +1014,42 @@ export default function BookingPage() {
             </div>
           </div>
 
-          {customer?.qrSvg ? (
-            <QrCard
-              title="Your bag QR"
-              subtitle="This bag QR is already linked to your account and will be used for repeat pickups."
-              bagCode={customer.bagCode}
-              qrSvg={customer.qrSvg}
-            />
-          ) : null}
+          {(customer?.qrSvg || orders.length > 0) && (
+            <div className="grid gap-6 sm:grid-cols-2">
+              {customer?.qrSvg ? (
+                <QrCard
+                  title="Your bag QR"
+                  subtitle="Linked to your account for repeat pickups."
+                  bagCode={customer.bagCode}
+                  qrSvg={customer.qrSvg}
+                />
+              ) : null}
 
-          <div className="rounded-[2rem] border border-sand-200 bg-white/88 p-6 shadow-soft">
-            <div className="flex items-start gap-3">
-              <span className="mt-1 text-sand-600">⌘</span>
-              <div>
-                <h4 className="font-display text-3xl leading-none">
-                  Smart Pickup
-                </h4>
-                <p className="mt-2 text-sm leading-7 text-sand-700">
-                  Your bag is automatically recognised. No repeated address
-                  entry is needed.
-                </p>
-              </div>
+              {orders.length > 0 ? (
+                <div className="rounded-[2rem] border border-sand-200 bg-white/88 p-6 shadow-soft">
+                  <h4 className="font-display text-3xl leading-none">
+                    Recent orders
+                  </h4>
+                  <div className="mt-4 space-y-3">
+                    {orders.slice(0, 3).map((order) => (
+                      <article
+                        key={order.id}
+                        className="rounded-[1.4rem] border border-sand-200 bg-sand-50 p-4 text-sm"
+                      >
+                        <small className="block text-sand-600">
+                          {order.invoice_number}
+                        </small>
+                        <strong className="mt-1 block text-sand-900">
+                          {formatPickupDate(order.pickup_date)} •{" "}
+                          {order.pickup_slot}
+                        </strong>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
-          </div>
-
-          {orders.length ? (
-            <div className="rounded-[2rem] border border-sand-200 bg-white/88 p-6 shadow-soft">
-              <h4 className="font-display text-3xl leading-none">
-                Recent orders
-              </h4>
-              <div className="mt-5 space-y-3">
-                {orders.slice(0, 3).map((order) => (
-                  <article
-                    key={order.id}
-                    className="rounded-[1.4rem] border border-sand-200 bg-sand-50 p-4 text-sm"
-                  >
-                    <small className="block text-sand-600">
-                      {order.invoice_number}
-                    </small>
-                    <strong className="mt-2 block text-sand-900">
-                      {formatPickupDate(order.pickup_date)} •{" "}
-                      {order.pickup_slot}
-                    </strong>
-                  </article>
-                ))}
-              </div>
-            </div>
-          ) : null}
+          )}
         </div>
       </div>
     );
