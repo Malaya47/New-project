@@ -9,7 +9,7 @@ const QRCode = require("qrcode");
 const { sendOrderConfirmation, sendStatusUpdate } = require("./mailer");
 
 const HOST = process.env.HOST || "127.0.0.1";
-const PORT = Number(process.env.PORT || 5000);
+const PORT = Number(process.env.PORT || 4000);
 const APP_BASE_URL = process.env.APP_BASE_URL || "https://laundry.li";
 const ROOT = __dirname;
 const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "..", "data");
