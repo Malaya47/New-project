@@ -5,4 +5,6 @@ data/*.sqlite
 data/*.sqlite-shm
 data/*.sqlite-wal
 .env
+.env.local
 backend/.env
+frontend/.env.local
