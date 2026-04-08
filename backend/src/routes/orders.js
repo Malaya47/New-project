@@ -3,6 +3,7 @@ const { getSession } = require("../lib/session");
 const {
   getCustomerById,
   getCustomerByBagCode,
+  getCustomerByEmail,
   serializeCustomer,
 } = require("../lib/customer");
 const { insertOrder } = require("../lib/order");
@@ -22,6 +23,8 @@ router.post("/repeat-pickup", async (req, res) => {
     customer = await getCustomerById(session.userId);
   } else if (body.bagCode) {
     customer = await getCustomerByBagCode(body.bagCode);
+  } else if (body.email) {
+    customer = await getCustomerByEmail(body.email);
   }
 
   if (!customer) {

@@ -76,15 +76,7 @@ function orderTable(order) {
 
 // ─── Customer: new order ──────────────────────────────────────────────────────
 function buildCustomerOrderHtml({ customer, order }) {
-  const qrSection = customer.qrSvg
-    ? `<div style="margin:24px 0;text-align:center">
-        <p style="font-size:13px;color:#6b4828;margin-bottom:12px">Your QR bag code — stick or attach this to your laundry bag</p>
-        <div style="display:inline-block;padding:16px;background:#fff;border-radius:16px;border:1px solid #f2dfc6">
-          ${customer.qrSvg}
-        </div>
-        <p style="font-size:12px;color:#946537;margin-top:8px;font-weight:700">Bag code: ${customer.bagCode}</p>
-      </div>`
-    : "";
+  const qrSection = ""; // personalized QR removed — bags carry a single generic QR
 
   return `${BASE}
     ${header("Pickup confirmed!")}
@@ -196,4 +188,25 @@ async function sendStatusUpdate({ customer, order, status }) {
   );
 }
 
-module.exports = { sendOrderConfirmation, sendStatusUpdate };
+// ─── OTP email ───────────────────────────────────────────────────────────────
+async function sendOtpEmail(email, otp) {
+  const html = `${BASE}
+    ${header("Your verification code")}
+    <div style="padding:32px">
+      <p style="font-size:16px;color:#2a1c12;margin-top:0">Your one-time verification code is:</p>
+      <div style="text-align:center;margin:32px 0">
+        <span style="display:inline-block;font-size:44px;font-weight:800;letter-spacing:0.25em;color:#2a1c12;background:#f2dfc6;padding:16px 28px;border-radius:16px">${otp}</span>
+      </div>
+      <p style="font-size:14px;color:#6b4828;line-height:1.7">
+        This code expires in <strong>10 minutes</strong>. Do not share it with anyone.
+      </p>
+      <p style="font-size:13px;color:#946537;margin-top:16px">
+        If you didn't request this code, you can safely ignore this email.
+      </p>
+    </div>
+    ${FOOTER_HTML}
+  </div>`;
+  await sendMail(email, "Your laundry.li verification code", html);
+}
+
+module.exports = { sendOrderConfirmation, sendStatusUpdate, sendOtpEmail };

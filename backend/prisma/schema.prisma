@@ -24,7 +24,6 @@ model Customer {
   createdAt    DateTime  @default(now()) @map("created_at")
 
   orders   Order[]
-  sessions Session[]
 
   @@map("customers")
 }
@@ -53,13 +52,11 @@ model Order {
 }
 
 model Session {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  role       String
-  createdAt  DateTime @default(now()) @map("created_at")
-  expiresAt  DateTime @map("expires_at")
-
-  customer   Customer? @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  role      String
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
 
   @@map("sessions")
 }
@@ -72,4 +69,15 @@ model Admin {
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("admins")
+}
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  otp       String?
+  verified  Boolean  @default(false)
+  sentAt    DateTime @map("sent_at")
+  expiresAt DateTime @map("expires_at")
+
+  @@map("otp_codes")
 }

@@ -529,16 +529,17 @@ export default function AdminPage() {
                             >
                               <td className="px-6 py-3.5">
                                 <p className="font-semibold text-gray-900">
-                                  {order.first_name} {order.last_name}
+                                  {order.customer?.firstName}{" "}
+                                  {order.customer?.lastName}
                                 </p>
                                 <p className="text-xs text-gray-400">
-                                  {order.invoice_number}
+                                  {order.invoiceNumber}
                                 </p>
                               </td>
                               <td className="px-6 py-3.5 text-gray-600 text-xs">
-                                <p>{formatPickupDate(order.pickup_date)}</p>
+                                <p>{formatPickupDate(order.pickupDate)}</p>
                                 <p className="text-gray-400">
-                                  {order.pickup_slot}
+                                  {order.pickupSlot}
                                 </p>
                               </td>
                               <td className="px-6 py-3.5 font-semibold text-gray-900">
@@ -628,18 +629,18 @@ export default function AdminPage() {
                       {(overview.customers || []).slice(0, 5).map((c) => (
                         <div key={c.id} className="flex items-center gap-3">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600">
-                            {c.first_name?.[0]?.toUpperCase() || "?"}
+                            {c.firstName?.[0]?.toUpperCase() || "?"}
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-gray-900">
-                              {c.first_name} {c.last_name}
+                              {c.firstName} {c.lastName}
                             </p>
                             <p className="truncate text-xs text-gray-400">
                               {c.email}
                             </p>
                           </div>
                           <code className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-mono text-gray-600">
-                            {c.bag_code}
+                            {c.bagCode}
                           </code>
                         </div>
                       ))}
@@ -690,26 +691,27 @@ export default function AdminPage() {
                         >
                           <td className="px-6 py-4">
                             <code className="font-mono text-xs text-gray-500">
-                              {order.invoice_number}
+                              {order.invoiceNumber}
                             </code>
                           </td>
                           <td className="px-6 py-4">
                             <p className="font-semibold text-gray-900">
-                              {order.first_name} {order.last_name}
+                              {order.customer?.firstName}{" "}
+                              {order.customer?.lastName}
                             </p>
                             <p className="text-xs text-gray-400">
-                              {order.email}
+                              {order.customer?.email}
                             </p>
                           </td>
                           <td className="px-6 py-4 text-gray-600 text-xs">
                             <p className="font-medium text-gray-800">
-                              {formatPickupDate(order.pickup_date)}
+                              {formatPickupDate(order.pickupDate)}
                             </p>
-                            <p className="text-gray-400">{order.pickup_slot}</p>
+                            <p className="text-gray-400">{order.pickupSlot}</p>
                           </td>
                           <td className="px-6 py-4">
                             <code className="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-700">
-                              {order.bag_code}
+                              {order.customer?.bagCode}
                             </code>
                           </td>
                           <td className="px-6 py-4 font-semibold text-gray-900">
@@ -805,10 +807,10 @@ export default function AdminPage() {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600">
-                                {c.first_name?.[0]?.toUpperCase() || "?"}
+                                {c.firstName?.[0]?.toUpperCase() || "?"}
                               </div>
                               <span className="font-semibold text-gray-900">
-                                {c.first_name} {c.last_name}
+                                {c.firstName} {c.lastName}
                               </span>
                             </div>
                           </td>
@@ -818,21 +820,21 @@ export default function AdminPage() {
                           </td>
                           <td className="px-6 py-4">
                             <code className="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-700">
-                              {c.bag_code}
+                              {c.bagCode}
                             </code>
                           </td>
                           <td className="px-6 py-4 text-center font-semibold text-gray-800">
-                            {c.order_count}
+                            {c.orderCount}
                           </td>
                           <td className="px-6 py-4 font-semibold text-gray-800">
-                            {formatCurrency(c.total_spent)}
+                            {formatCurrency(c.totalSpent)}
                           </td>
                           <td className="px-6 py-4">
                             <StatusBadge status={c.status || "active"} />
                           </td>
                           <td className="px-6 py-4 text-xs text-gray-400">
-                            {c.created_at
-                              ? new Date(c.created_at).toLocaleDateString(
+                            {c.createdAt
+                              ? new Date(c.createdAt).toLocaleDateString(
                                   "en-IN",
                                   {
                                     day: "2-digit",
@@ -975,23 +977,23 @@ export default function AdminPage() {
                               >
                                 <td className="px-6 py-4">
                                   <code className="font-mono text-xs text-gray-500">
-                                    {order.invoice_number}
+                                    {order.invoiceNumber}
                                   </code>
                                 </td>
                                 <td className="px-6 py-4 text-gray-700">
-                                  {formatPickupDate(order.pickup_date)}
+                                  {formatPickupDate(order.pickupDate)}
                                 </td>
                                 <td className="px-6 py-4 text-xs text-gray-500">
-                                  {order.pickup_slot}
+                                  {order.pickupSlot}
                                 </td>
                                 <td className="px-6 py-4 capitalize text-gray-700">
-                                  {String(order.laundry_type || "").replaceAll(
+                                  {String(order.laundryType || "").replaceAll(
                                     "_",
                                     " ",
                                   )}
                                 </td>
                                 <td className="px-6 py-4 text-center text-gray-700">
-                                  {order.shirts_count || 0}
+                                  {order.shirtsCount || 0}
                                 </td>
                                 <td className="px-6 py-4 font-semibold text-gray-900">
                                   {formatCurrency(order.amount)}

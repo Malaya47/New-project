@@ -2,7 +2,6 @@ const { Router } = require("express");
 const crypto = require("crypto");
 const prisma = require("../db");
 const { hashPassword, verifyPassword } = require("../lib/helpers");
-const { createBagIdentity } = require("../lib/qr");
 const { createSession, destroySession, getSession } = require("../lib/session");
 const {
   serializeCustomer,
@@ -11,8 +10,16 @@ const {
   getOrdersForCustomer,
 } = require("../lib/customer");
 const { insertOrder } = require("../lib/order");
-const { sendOrderConfirmation } = require("../../mailer");
+const { sendOrderConfirmation, sendOtpEmail } = require("../../mailer");
 const { formatMoney } = require("../lib/helpers");
+
+function makeBagCode() {
+  return `LB-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+}
+
+function generateOtp() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
 
 const router = Router();
 
@@ -53,7 +60,7 @@ async function handleRegister(req, res) {
   }
 
   if (!customer) {
-    const { bagCode, qrPayload, qrSvg } = await createBagIdentity();
+    const bagCode = makeBagCode();
     customer = await prisma.customer.create({
       data: {
         id: crypto.randomUUID(),
@@ -65,9 +72,9 @@ async function handleRegister(req, res) {
         city: String(body.city || "").trim() || "Pending",
         phone: body.phone || null,
         bagCode,
-        qrPayload,
-        qrSvg,
-        passwordHash: hashPassword(body.password),
+        qrPayload: "",
+        qrSvg: "",
+        passwordHash: body.password ? hashPassword(body.password) : null,
         status: "active",
         lastLoginAt: now,
       },
@@ -107,14 +114,12 @@ async function handleRegister(req, res) {
     status: order.status,
   };
 
-  res
-    .status(201)
-    .json({
-      success: true,
-      mode: "registered",
-      customer: serialized,
-      order: orderPayload,
-    });
+  res.status(201).json({
+    success: true,
+    mode: "registered",
+    customer: serialized,
+    order: orderPayload,
+  });
 
   sendOrderConfirmation({ customer: serialized, order: orderPayload }).catch(
     console.error,
@@ -148,7 +153,7 @@ router.post("/signup", async (req, res) => {
     });
   }
 
-  const { bagCode, qrPayload, qrSvg } = await createBagIdentity();
+  const bagCode = makeBagCode();
   const customer = await prisma.customer.create({
     data: {
       id: crypto.randomUUID(),
@@ -160,8 +165,8 @@ router.post("/signup", async (req, res) => {
       city: String(body.city).trim(),
       phone: body.phone || null,
       bagCode,
-      qrPayload,
-      qrSvg,
+      qrPayload: "",
+      qrSvg: "",
       passwordHash: hashPassword(body.password),
       status: "active",
       lastLoginAt: new Date(),
@@ -212,7 +217,7 @@ router.post("/start", async (req, res) => {
   let customer = await getCustomerByEmail(email);
 
   if (!customer) {
-    const { bagCode, qrPayload, qrSvg } = await createBagIdentity();
+    const bagCode = makeBagCode();
     customer = await prisma.customer.create({
       data: {
         id: crypto.randomUUID(),
@@ -223,8 +228,8 @@ router.post("/start", async (req, res) => {
         postalCode: "Pending",
         city: "Pending",
         bagCode,
-        qrPayload,
-        qrSvg,
+        qrPayload: "",
+        qrSvg: "",
         passwordHash: hashPassword(password),
         status: "active",
         lastLoginAt: new Date(),
@@ -256,6 +261,160 @@ router.post("/start", async (req, res) => {
     customer: serializeCustomer(customer),
     orders: await getOrdersForCustomer(customer.id),
   });
+});
+
+// ─── OTP routes ───────────────────────────────────────────────────────────────
+
+// POST /api/auth/otp/send
+router.post("/otp/send", async (req, res) => {
+  const email = String(req.body.email || "")
+    .trim()
+    .toLowerCase();
+  if (!email || !email.includes("@")) {
+    return res.status(400).json({ error: "A valid email is required." });
+  }
+
+  const now = new Date();
+  const existing = await prisma.otpCode.findUnique({ where: { email } });
+  if (existing && now - new Date(existing.sentAt) < 60_000) {
+    return res
+      .status(429)
+      .json({ error: "Please wait a moment before requesting another code." });
+  }
+
+  const otp = generateOtp();
+  await prisma.otpCode.upsert({
+    where: { email },
+    create: {
+      id: crypto.randomUUID(),
+      email,
+      otp,
+      verified: false,
+      sentAt: now,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    },
+    update: {
+      otp,
+      verified: false,
+      sentAt: now,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    },
+  });
+
+  console.log(`[OTP] ${email} → ${otp}`);
+  await sendOtpEmail(email, otp);
+
+  res.json({ success: true, message: "Verification code sent to your email." });
+});
+
+// POST /api/auth/otp/verify
+router.post("/otp/verify", async (req, res) => {
+  const email = String(req.body.email || "")
+    .trim()
+    .toLowerCase();
+  const otp = String(req.body.otp || "").trim();
+
+  if (!email || !otp) {
+    return res.status(400).json({ error: "Email and OTP are required." });
+  }
+
+  const entry = await prisma.otpCode.findUnique({ where: { email } });
+  if (!entry || new Date(entry.expiresAt) < new Date()) {
+    return res
+      .status(400)
+      .json({ error: "OTP has expired. Please request a new one." });
+  }
+  if (entry.otp !== otp) {
+    return res
+      .status(400)
+      .json({ error: "Incorrect code. Please check your email." });
+  }
+
+  // Mark verified; extend expiry by 15 min for profile submission
+  await prisma.otpCode.update({
+    where: { email },
+    data: {
+      otp: null,
+      verified: true,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+    },
+  });
+
+  res.json({ success: true, verified: true });
+});
+
+// POST /api/auth/otp/register  — saves profile after OTP verification
+router.post("/otp/register", async (req, res) => {
+  const email = String(req.body.email || "")
+    .trim()
+    .toLowerCase();
+  const firstName = String(req.body.firstName || "").trim();
+  const lastName = String(req.body.lastName || "").trim();
+  const address = String(req.body.address || "").trim();
+  const postalCode = String(req.body.postalCode || "").trim();
+  const city = String(req.body.city || "").trim();
+  const phone = req.body.phone ? String(req.body.phone).trim() : null;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required." });
+  }
+
+  const entry = await prisma.otpCode.findUnique({ where: { email } });
+  if (!entry || !entry.verified || new Date(entry.expiresAt) < new Date()) {
+    return res.status(400).json({
+      error: "Email not verified. Please complete OTP verification first.",
+    });
+  }
+
+  if (!firstName || !lastName || !address) {
+    return res
+      .status(400)
+      .json({ error: "First name, last name, and address are required." });
+  }
+
+  let customer = await getCustomerByEmail(email);
+
+  if (!customer) {
+    const bagCode = makeBagCode();
+    customer = await prisma.customer.create({
+      data: {
+        id: crypto.randomUUID(),
+        email,
+        firstName,
+        lastName,
+        address,
+        postalCode: postalCode || "Pending",
+        city: city || "Pending",
+        phone,
+        bagCode,
+        qrPayload: "",
+        qrSvg: "",
+        status: "active",
+        lastLoginAt: new Date(),
+      },
+    });
+  } else {
+    await prisma.customer.update({
+      where: { id: customer.id },
+      data: {
+        firstName: firstName || customer.firstName,
+        lastName: lastName || customer.lastName,
+        address: address || customer.address,
+        postalCode: postalCode || customer.postalCode,
+        city: city || customer.city,
+        phone: phone ?? customer.phone,
+        lastLoginAt: new Date(),
+      },
+    });
+    customer = await getCustomerByEmail(email);
+  }
+
+  await prisma.otpCode.delete({ where: { email } });
+  await createSession(res, "customer", customer.id);
+
+  res
+    .status(201)
+    .json({ success: true, customer: serializeCustomer(customer) });
 });
 
 // POST /api/auth/logout

@@ -10,7 +10,7 @@ const ordersRouter = require("./routes/orders");
 const bagRouter = require("./routes/bag");
 const invoiceRouter = require("./routes/invoice");
 
-const HOST = process.env.HOST || "127.0.0.1";
+const HOST = process.env.HOST || "0.0.0.0";
 const PORT = Number(process.env.PORT || 4000);
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
