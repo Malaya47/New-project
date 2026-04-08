@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Customer {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  firstName    String    @map("first_name")
+  lastName     String    @map("last_name")
+  address      String
+  postalCode   String    @map("postal_code")
+  city         String
+  phone        String?
+  bagCode      String    @unique @map("bag_code")
+  qrPayload    String    @map("qr_payload")
+  qrSvg        String    @map("qr_svg")
+  passwordHash String?   @map("password_hash")
+  status       String    @default("active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  orders   Order[]
+  sessions Session[]
+
+  @@map("customers")
+}
+
+model Order {
+  id            String    @id @default(uuid())
+  customerId    String    @map("customer_id")
+  pickupDate    String    @map("pickup_date")
+  pickupSlot    String    @map("pickup_slot")
+  laundryType   String    @map("laundry_type")
+  shirtsCount   Int       @map("shirts_count")
+  notes         String?
+  amount        Decimal
+  invoiceNumber String    @unique @map("invoice_number")
+  invoiceHtml   String    @map("invoice_html")
+  invoiceText   String?   @map("invoice_text")
+  status        String    @default("scheduled")
+  returnWindow  String?   @map("return_window")
+  billingPlan   String    @default("single") @map("billing_plan")
+  updatedAt     DateTime? @map("updated_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  @@map("orders")
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  role       String
+  createdAt  DateTime @default(now()) @map("created_at")
+  expiresAt  DateTime @map("expires_at")
+
+  customer   Customer? @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("admins")
+}
