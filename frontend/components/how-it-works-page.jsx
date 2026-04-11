@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { processSteps } from "../lib/site-data";
 import {
@@ -8,76 +9,43 @@ import {
   TopNav,
 } from "./shared-ui";
 
-const stepIcons = [
-  /* 1 – QR code */
-  <svg
-    key="qr"
-    width="36"
-    height="36"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none" />
-    <rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none" />
-    <rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none" />
-    <path d="M14 14h3v3h-3zM17 17h3v3h-3zM14 17v3" />
-  </svg>,
-  /* 2 – Clock */
-  <svg
-    key="clock"
-    width="36"
-    height="36"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <circle cx="12" cy="12" r="9" />
-    <polyline points="12 7 12 12 15.5 14" />
-  </svg>,
-  /* 3 – Door */
-  <svg
-    key="door"
-    width="36"
-    height="36"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M14 2H6a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7z" />
-    <path d="M14 2v5h5" />
-    <circle cx="15" cy="13" r="1" fill="currentColor" stroke="none" />
-  </svg>,
-  /* 4 – T-shirt */
-  <svg
-    key="shirt"
-    width="36"
-    height="36"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z" />
-  </svg>,
+// Image icons used on both desktop (replacing SVGs) and mobile
+const stepImages = [
+  { src: "/images/QR.png", alt: "QR code" },
+  { src: "/images/location.png", alt: "Location" },
+  { src: "/images/pick-up.png", alt: "Pick-up" },
+  { src: "/images/laundry.png", alt: "Laundry" },
+];
+
+// Mobile-specific step content (English, matching reference design)
+const mobileSteps = [
+  {
+    img: "/images/QR.png",
+    alt: "QR code",
+    title: "Scan the QR code",
+    description: "Scan the code on your laundry bag directly with your phone.",
+  },
+  {
+    img: "/images/location.png",
+    alt: "Location",
+    title: "Choose a time window",
+    description:
+      "Your address is recognised and you choose an available time slot.",
+  },
+  {
+    img: "/images/pick-up.png",
+    alt: "Pick-up",
+    title: "Place it by the door",
+    description:
+      "Put your bag outside in the morning for scheduled collection.",
+  },
+  {
+    img: "/images/laundry.png",
+    alt: "Laundry",
+    title: "Receive it back clean",
+    description:
+      "In the evening you get your laundry back clean, ironed and folded.",
+  },
 ];
 
 export default function HowItWorksPage() {
@@ -86,7 +54,114 @@ export default function HowItWorksPage() {
       <PageGlow />
       <TopNav ctaHref="/book" ctaLabel="Start booking" />
 
-      <main className="mx-auto max-w-2xl px-4 py-14">
+      {/* ─────────────────────────────────────────────────────
+          MOBILE layout  (< md)  — matches reference design
+      ───────────────────────────────────────────────────── */}
+      <div className="md:hidden min-h-screen bg-hero-wash px-4 py-12">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <div className="mb-4 flex items-center justify-center gap-3">
+            <div className="h-px w-10 bg-sand-400" />
+            <span className="font-display text-xs italic font-semibold tracking-widest text-sand-500">
+              Smart Pickup System
+            </span>
+            <div className="h-px w-10 bg-sand-400" />
+          </div>
+          <h1 className="font-display text-3xl font-bold leading-tight text-sand-900">
+            Scan. Choose a time.
+            <br />
+            Place it by the door.
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-sand-600">
+            The QR code on your bag makes
+            <br />
+            ordering even easier.
+          </p>
+        </div>
+
+        {/* Steps */}
+        <div className="flex flex-col items-center">
+          {mobileSteps.map((step, index) => (
+            <div key={step.title} className="flex w-full flex-col items-center">
+              <article className="w-full rounded-3xl border border-sand-200 bg-white/90 p-5 shadow-soft">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-2xl bg-sand-50 shadow-soft">
+                    <Image
+                      src={step.img}
+                      alt={step.alt}
+                      width={52}
+                      height={52}
+                      className="object-contain"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-display text-base font-bold text-sand-900">
+                      {step.title}
+                    </h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-sand-600">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              </article>
+
+              {/* Connector: line → gold dot → line */}
+              {index < mobileSteps.length - 1 && (
+                <div className="flex flex-col items-center">
+                  <div className="h-4 w-px bg-sand-300" />
+                  <div className="h-3 w-3 rounded-full bg-sand-400 shadow-sm" />
+                  <div className="h-4 w-px bg-sand-300" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom invoice note */}
+        <div className="mt-8 border-t border-sand-200 pt-5 text-center">
+          <p className="text-sm italic leading-relaxed text-sand-500">
+            End of month: You conveniently receive a<br />
+            consolidated invoice by email.
+          </p>
+
+          {/* Two benefit icons */}
+          <div className="mt-5 flex items-center justify-center divide-x divide-sand-200">
+            <div className="flex items-center gap-2 pr-6">
+              <Image
+                src="/images/Map-pin.png"
+                alt="Map pin"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
+              <span className="text-xs font-semibold leading-tight text-sand-700">
+                No address
+                <br />
+                re-entry
+              </span>
+            </div>
+            <div className="flex items-center gap-2 pl-6">
+              <Image
+                src="/images/credit-card.png"
+                alt="Credit card"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
+              <span className="text-xs font-semibold leading-tight text-sand-700">
+                No online
+                <br />
+                payment needed
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────
+          DESKTOP layout  (md+)  — original layout, image icons
+      ───────────────────────────────────────────────────── */}
+      <main className="hidden md:block mx-auto max-w-2xl px-4 py-14">
         <SectionHeading
           eyebrow="Smart pickup"
           title="Scan. Choose a time. Leave it by the door."
@@ -99,14 +174,20 @@ export default function HowItWorksPage() {
             <div key={step.title}>
               <article className="rounded-[2rem] border border-sand-400 bg-sand-50 p-6">
                 <div className="flex items-start gap-5">
-                  {/* Icon box */}
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-white text-sand-500 shadow-soft">
-                    {stepIcons[index]}
+                  {/* Icon box — image instead of SVG */}
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-white shadow-soft">
+                    <Image
+                      src={stepImages[index].src}
+                      alt={stepImages[index].alt}
+                      width={48}
+                      height={48}
+                      className="object-contain"
+                    />
                   </div>
 
                   {/* Content */}
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-sand-900">
+                    <h3 className="font-display text-xl font-bold text-sand-900">
                       {index + 1}. {step.title}
                     </h3>
                     <p className="mt-2 text-sm leading-7 text-sand-700">
@@ -212,8 +293,48 @@ export default function HowItWorksPage() {
             </Link>
           </div>
         </div>
+
+        {/* Bottom invoice note + benefit icons */}
+        <div className="mt-8 border-t border-sand-200 pt-5 text-center">
+          <p className="text-sm italic leading-relaxed text-sand-500">
+            End of month: You conveniently receive a consolidated invoice by
+            email.
+          </p>
+          <div className="mt-5 flex items-center justify-center divide-x divide-sand-200">
+            <div className="flex items-center gap-2 pr-6">
+              <Image
+                src="/images/Map-pin.png"
+                alt="Map pin"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
+              <span className="text-xs font-semibold leading-tight text-sand-700">
+                No address
+                <br />
+                re-entry
+              </span>
+            </div>
+            <div className="flex items-center gap-2 pl-6">
+              <Image
+                src="/images/credit-card.png"
+                alt="Credit card"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
+              <span className="text-xs font-semibold leading-tight text-sand-700">
+                No online
+                <br />
+                payment needed
+              </span>
+            </div>
+          </div>
+        </div>
       </main>
-      <Footer />
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </div>
   );
 }

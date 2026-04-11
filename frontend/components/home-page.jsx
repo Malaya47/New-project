@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { rules, services } from "../lib/site-data";
 import {
@@ -10,7 +11,6 @@ import {
 } from "./shared-ui";
 
 const ruleIcons = [
-  /* Prepare – shopping basket */
   <svg
     key="basket"
     width="24"
@@ -27,7 +27,6 @@ const ruleIcons = [
     <line x1="3" y1="6" x2="21" y2="6" />
     <path d="M16 10a4 4 0 0 1-8 0" />
   </svg>,
-  /* Know – info circle */
   <svg
     key="info"
     width="24"
@@ -44,7 +43,6 @@ const ruleIcons = [
     <line x1="12" y1="8" x2="12" y2="8" strokeWidth="2.5" />
     <line x1="12" y1="12" x2="12" y2="16" />
   </svg>,
-  /* Not accepted – ban */
   <svg
     key="ban"
     width="24"
@@ -63,7 +61,6 @@ const ruleIcons = [
 ];
 
 const serviceIcons = [
-  /* Washing – detergent bottle */
   <svg
     key="wash"
     width="26"
@@ -81,7 +78,6 @@ const serviceIcons = [
     <circle cx="12" cy="14" r="3" />
     <path d="M9 10h1" />
   </svg>,
-  /* Drying – wind */
   <svg
     key="dry"
     width="26"
@@ -98,7 +94,6 @@ const serviceIcons = [
     <path d="M9.6 4.6A2 2 0 1 1 11 8H2" />
     <path d="M12.6 19.4A2 2 0 1 0 14 16H2" />
   </svg>,
-  /* Ironing – t-shirt */
   <svg
     key="iron"
     width="26"
@@ -113,7 +108,6 @@ const serviceIcons = [
   >
     <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z" />
   </svg>,
-  /* Folding – stacked layers */
   <svg
     key="fold"
     width="26"
@@ -134,12 +128,91 @@ const serviceIcons = [
 
 export default function HomePage() {
   return (
-    <div className="relative overflow-x-hidden">
+    <div className="relative bg-hero-wash h-[100dvh] flex flex-col overflow-hidden lg:h-auto lg:block lg:overflow-x-hidden">
       <PageGlow />
       <TopNav ctaHref="/book" ctaLabel="Book pickup" />
 
-      <main>
-        <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-20 pt-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
+      <main className="flex-1 flex flex-col min-h-0 overflow-hidden lg:block lg:overflow-visible">
+        {/* ── MOBILE hero text (hidden on desktop) ─────────── */}
+        <section className="lg:hidden flex-shrink-0 px-6 pt-7 pb-4 text-center">
+          <h1 className="font-display text-4xl leading-tight">
+            We pick up <span className="whitespace-nowrap">your laundry.</span>
+          </h1>
+          <p className="mt-2 text-base font-medium text-sand-700">
+            Clean. Ironed. Folded back.
+          </p>
+          <hr className="my-3 border-sand-200" />
+          <p className="text-sm leading-5 text-sand-600">
+            Back clean in 48h — no effort for you.
+          </p>
+          <div className="mt-4 flex justify-center gap-3">
+            <Link href="/book">
+              <ActionButton asChild>Book now</ActionButton>
+            </Link>
+            <Link href="/how-it-works">
+              <ActionButton asChild variant="secondary">
+                How it works
+              </ActionButton>
+            </Link>
+          </div>
+          <p className="mt-2 text-xs text-sand-500">
+            Order once — everything runs automatically.
+          </p>
+        </section>
+
+        {/* ── MOBILE bag image edge-to-edge (hidden on desktop) */}
+        <div className="lg:hidden flex-1 min-h-0 overflow-hidden relative">
+          <Image
+            src="/images/bag.png"
+            alt="Premium black laundry bag filled with folded clothes"
+            fill
+            priority
+            className="object-cover object-center"
+          />
+        </div>
+
+        {/* ── MOBILE service strip (hidden on desktop) ─────── */}
+        <div className="lg:hidden flex-shrink-0 grid grid-cols-3 divide-x divide-sand-200 border-t border-sand-200 bg-[#fbf4ea] py-5">
+          <div className="flex flex-col items-center gap-3">
+            <Image
+              src="/images/Group 10.png"
+              alt="Washing"
+              width={56}
+              height={56}
+              className="object-contain"
+            />
+            <span className="text-xs font-semibold tracking-wide text-sand-800">
+              Washing
+            </span>
+          </div>
+          <div className="flex flex-col items-center gap-3">
+            <Image
+              src="/images/Group 12.png"
+              alt="Ironing"
+              width={56}
+              height={56}
+              className="object-contain"
+            />
+            <span className="text-xs font-semibold tracking-wide text-sand-800">
+              Ironing
+            </span>
+          </div>
+          <div className="flex flex-col items-center gap-3">
+            <Image
+              src="/images/Group 11 (1).png"
+              alt="Folding"
+              width={56}
+              height={56}
+              className="object-contain"
+            />
+            <span className="text-xs font-semibold tracking-wide text-sand-800">
+              Folding
+            </span>
+          </div>
+        </div>
+
+        {/* ── DESKTOP hero (hidden on mobile) ──────────────── */}
+        <section className="hidden lg:grid mx-auto max-w-7xl gap-10 px-4 pb-20 pt-12 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
           <div>
             <h1 className="font-display text-6xl leading-none md:text-8xl">
               We pick up{" "}
@@ -167,11 +240,11 @@ export default function HomePage() {
               checkout at pickup time.
             </p>
           </div>
-
           <HeroVisual />
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-16">
+        {/* ── DESKTOP-only sections ─────────────────────────── */}
+        <section className="hidden lg:block mx-auto max-w-7xl px-4 py-16">
           <SectionHeading
             eyebrow="Pricing & billing"
             title="Simple. Transparent. Convenient."
@@ -217,7 +290,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-20">
+        <section className="hidden lg:block mx-auto max-w-7xl px-4 py-20">
           <SectionHeading
             eyebrow="Our service"
             title="We handle the part that takes time."
@@ -233,7 +306,7 @@ export default function HomePage() {
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-sand-500 shadow-soft">
                   {serviceIcons[index]}
                 </div>
-                <h3 className="mt-5 text-2xl font-bold text-sand-900">
+                <h3 className="mt-5 font-display text-2xl font-bold text-sand-900">
                   {service.title}
                 </h3>
                 <p className="mt-3 text-sm leading-7 text-sand-700">
@@ -244,7 +317,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-10">
+        <section className="hidden lg:block mx-auto max-w-7xl px-4 py-10">
           <div className="overflow-hidden rounded-[2.4rem] border border-sand-200 bg-white/85 p-5 shadow-glow">
             <div className="grid gap-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
               <div className="rounded-[2rem] bg-[linear-gradient(180deg,#f6ecdf_0%,#f3e1c5_100%)] p-5">
@@ -262,21 +335,20 @@ export default function HomePage() {
                   Designed for repeat use, not one-off friction.
                 </h2>
                 <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-sand-700">
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
-                    Shirts
-                  </span>
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
-                    Trousers
-                  </span>
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
-                    Underwear
-                  </span>
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
-                    Sportswear
-                  </span>
-                  <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
-                    Towels
-                  </span>
+                  {[
+                    "Shirts",
+                    "Trousers",
+                    "Underwear",
+                    "Sportswear",
+                    "Towels",
+                  ].map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3"
+                    >
+                      {item}
+                    </span>
+                  ))}
                 </div>
                 <div className="mt-8">
                   <Link href="/book">
@@ -288,27 +360,24 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-20">
+        <section className="hidden lg:block mx-auto max-w-7xl px-4 py-20">
           <SectionHeading
             eyebrow="Preparation"
             title="Prepare it simply. We handle the rest."
             description="The detailed process is now on its own page, while the homepage keeps only the most important preparation guidance."
             centered
           />
-          <div className="mt-8  mx-auto max-w-2xl space-y-4">
+          <div className="mt-8 mx-auto max-w-2xl space-y-4">
             {rules.map((rule, index) => (
               <article
                 key={rule.title}
                 className="flex gap-5 border border-sand-200 rounded-[2rem] bg-sand-100 p-6"
               >
-                {/* Icon */}
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-sand-500 shadow-soft">
                   {ruleIcons[index]}
                 </div>
-
-                {/* Content */}
                 <div>
-                  <h3 className="text-lg font-bold text-sand-900">
+                  <h3 className="font-display text-lg font-bold text-sand-900">
                     {rule.title}
                   </h3>
                   <ul className="mt-3 space-y-2">
@@ -357,7 +426,11 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-      <Footer />
+
+      {/* Footer — desktop only */}
+      <div className="hidden lg:block">
+        <Footer />
+      </div>
     </div>
   );
 }

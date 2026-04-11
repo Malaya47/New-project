@@ -1,24 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { bookingSlots, laundryTypes } from "../lib/site-data";
-import {
-  ActionButton,
-  apiFetch,
-  capitalize,
-  Footer,
-  formatCurrency,
-  formatPickupDate,
-  Input,
-  LaundryTypeCard,
-  PageGlow,
-  RadioPill,
-  SectionHeading,
-  Textarea,
-  Toast,
-  TopNav,
-} from "./shared-ui";
+import { bookingSlots } from "../lib/site-data";
+import { apiFetch, PageGlow, Toast, TopNav } from "./shared-ui";
 
 const tomorrow = () => {
   const d = new Date();
@@ -26,74 +11,153 @@ const tomorrow = () => {
   return d.toISOString().split("T")[0];
 };
 
-function SummaryRow({ label, value, strong = false }) {
+function formatShortDate(dateStr) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}
+
+function MobileHeader({ step, totalSteps, onBack, onClose }) {
   return (
-    <div className="flex items-center justify-between gap-4 text-sm">
-      <span className="text-sand-600">{label}</span>
-      <span className={strong ? "font-extrabold text-sand-900" : "font-semibold text-sand-800"}>
-        {value}
-      </span>
+    <div className="sticky top-0 z-30 flex items-center justify-between bg-[#fbf4ea]/95 px-5 py-4 backdrop-blur lg:hidden">
+      {onBack ? (
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center text-sand-700"
+          aria-label="Back"
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+      ) : (
+        <div className="w-6" />
+      )}
+      <span className="font-display text-2xl text-sand-900">laundry.li</span>
+      {step && totalSteps ? (
+        <span className="text-xs font-semibold text-sand-500">
+          Step {step} of {totalSteps}
+        </span>
+      ) : onClose ? (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="text-sand-700"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      ) : (
+        <div className="w-6" />
+      )}
     </div>
   );
 }
 
-function CounterCard({ title, subtitle, price, count, active = false, onDecrease, onIncrease }) {
+function DetailRow({ icon, label, value }) {
   return (
-    <article
-      className={`rounded-[1.8rem] border p-5 transition ${
-        active ? "border-sand-500 bg-white shadow-soft" : "border-sand-200 bg-white/80"
-      }`}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h4 className="font-display text-3xl leading-none">{title}</h4>
-          <p className="mt-2 text-sm text-sand-600">{subtitle}</p>
-        </div>
-        <div className="rounded-full bg-sand-50 px-3 py-2 text-sm font-bold text-sand-700">
-          {price}
-        </div>
-      </div>
-      <div className="mt-6 flex items-center justify-between gap-4">
-        <span className="text-sm font-semibold text-sand-700">Quantity</span>
-        <div className="inline-flex items-center gap-4 rounded-full border border-sand-200 bg-sand-50 px-4 py-2">
-          <button type="button" onClick={onDecrease} className="text-lg font-bold text-sand-600">-</button>
-          <span className="min-w-6 text-center text-sm font-extrabold text-sand-900">{count}</span>
-          <button type="button" onClick={onIncrease} className="text-lg font-bold text-sand-600">+</button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function CardShell({ eyebrow, title, description, children }) {
-  return (
-    <div className="rounded-[2rem] border border-sand-200 bg-white/90 p-6 shadow-soft md:p-7">
-      {eyebrow ? (
-        <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-sand-700">{eyebrow}</p>
-      ) : null}
-      <h3 className="mt-3 font-display text-4xl leading-none md:text-5xl">{title}</h3>
-      {description ? (
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-sand-700">{description}</p>
-      ) : null}
-      <div className="mt-6">{children}</div>
+    <div className="flex items-center gap-3 border-b border-sand-100 py-3 last:border-0">
+      <span className="flex-shrink-0 text-sand-500">{icon}</span>
+      <span className="w-20 flex-shrink-0 text-xs text-sand-500">{label}</span>
+      <span className="text-sm font-semibold text-sand-900">{value}</span>
     </div>
   );
 }
+
+function TshirtWhite() {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" className="h-12 w-12">
+      <path
+        d="M16 16L8 28l12 5V52h24V33l12-5-8-12-10 7c-1-3-4-5-6-5s-5 2-6 5L16 16z"
+        fill="#f5f0eb"
+        stroke="#c8a97a"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TshirtDark() {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" className="h-12 w-12">
+      <path
+        d="M16 16L8 28l12 5V52h24V33l12-5-8-12-10 7c-1-3-4-5-6-5s-5 2-6 5L16 16z"
+        fill="#2a1c12"
+        stroke="#c8a97a"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TshirtColor() {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" className="h-12 w-12">
+      <defs>
+        <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#e96c7a" />
+          <stop offset="50%" stopColor="#f9a03f" />
+          <stop offset="100%" stopColor="#5cb8e4" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M16 16L8 28l12 5V52h24V33l12-5-8-12-10 7c-1-3-4-5-6-5s-5 2-6 5L16 16z"
+        fill="url(#cg)"
+        stroke="#c8a97a"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+const LAUNDRY_TYPES = [
+  { value: "white", label: "White", Icon: TshirtWhite },
+  { value: "dark", label: "Dark", Icon: TshirtDark },
+  { value: "color", label: "Color", Icon: TshirtColor },
+];
+
+const LAUNDRY_LABEL = { white: "White", dark: "Dark", color: "Color" };
 
 export default function BagScanPage({ code }) {
   const isScanMode = !code || code === "scan";
 
-  // ── email lookup state (scan mode) ──────────────────────────────────────────
+  // step: 0 = email (scan mode only), 1 = booking form, 2 = review, 3 = confirmed
+  const [step, setStep] = useState(isScanMode ? 0 : 1);
+
   const [scanEmail, setScanEmail] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailNotFound, setEmailNotFound] = useState(false);
 
-  // ── bag/customer state ───────────────────────────────────────────────────────
   const [customer, setCustomer] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(!isScanMode);
 
-  // ── order state ──────────────────────────────────────────────────────────────
   const defaultForm = {
     pickupDate: tomorrow(),
     pickupSlot: bookingSlots[0],
@@ -101,7 +165,6 @@ export default function BagScanPage({ code }) {
     laundryType: "dark",
     shirtsCount: "0",
     notes: "",
-    // editable address fields (pre-filled from customer)
     firstName: "",
     lastName: "",
     address: "",
@@ -114,23 +177,21 @@ export default function BagScanPage({ code }) {
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(null);
   const [toast, setToast] = useState(null);
-  const [locationLoading, setLocationLoading] = useState(false);
+  const [checks, setChecks] = useState({
+    sorted: false,
+    noSpecial: false,
+    understand: false,
+  });
 
-  // ── live bill summary ────────────────────────────────────────────────────────
-  const summary = useMemo(() => {
-    const base = form.billingPlan === "subscription" ? 50 : 55;
-    const shirts = Number(form.shirtsCount || 0) * 4;
-    return { base, shirts, total: base + shirts };
-  }, [form.billingPlan, form.shirtsCount]);
+  const allChecked = checks.sorted && checks.noSpecial && checks.understand;
 
-  // ── toast auto-dismiss ───────────────────────────────────────────────────────
   useEffect(() => {
     if (!toast) return undefined;
     const t = setTimeout(() => setToast(null), 3600);
     return () => clearTimeout(t);
   }, [toast]);
 
-  // ── bag-code mode: lookup via code ───────────────────────────────────────────
+  // bagcode mode: auto-lookup
   useEffect(() => {
     if (isScanMode) return;
     async function lookup() {
@@ -138,7 +199,10 @@ export default function BagScanPage({ code }) {
         const res = await fetch(`/api/bag/${encodeURIComponent(code)}`, {
           credentials: "same-origin",
         });
-        if (res.status === 404) { setNotFound(true); return; }
+        if (res.status === 404) {
+          setNotFound(true);
+          return;
+        }
         const data = await res.json();
         setCustomer(data);
         setForm((f) => ({
@@ -150,13 +214,16 @@ export default function BagScanPage({ code }) {
           city: data.city || "",
           phone: data.phone || "",
         }));
-      } catch { setNotFound(true); }
-      finally { setLoading(false); }
+        setStep(1);
+      } catch {
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
     }
     lookup();
   }, [code, isScanMode]);
 
-  // ── scan mode: email lookup ──────────────────────────────────────────────────
   async function handleEmailLookup(e) {
     e.preventDefault();
     const email = scanEmail.trim().toLowerCase();
@@ -164,10 +231,14 @@ export default function BagScanPage({ code }) {
     setEmailLoading(true);
     setEmailNotFound(false);
     try {
-      const res = await fetch(`/api/bag/email?email=${encodeURIComponent(email)}`, {
-        credentials: "same-origin",
-      });
-      if (res.status === 404) { setEmailNotFound(true); return; }
+      const res = await fetch(
+        `/api/bag/email?email=${encodeURIComponent(email)}`,
+        { credentials: "same-origin" },
+      );
+      if (res.status === 404) {
+        setEmailNotFound(true);
+        return;
+      }
       const data = await res.json();
       setCustomer(data);
       setForm((f) => ({
@@ -179,59 +250,25 @@ export default function BagScanPage({ code }) {
         city: data.city || "",
         phone: data.phone || "",
       }));
-    } catch { setEmailNotFound(true); }
-    finally { setEmailLoading(false); }
-  }
-
-  // ── live location autofill ───────────────────────────────────────────────────
-  function useLiveLocation() {
-    if (!navigator.geolocation) {
-      setToast({ type: "error", message: "Live location is not supported in this browser." });
-      return;
+      setStep(1);
+    } catch {
+      setEmailNotFound(true);
+    } finally {
+      setEmailLoading(false);
     }
-    setLocationLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}`,
-          );
-          const data = await response.json();
-          const addr = data.address || {};
-          setForm((f) => ({
-            ...f,
-            address:
-              [addr.house_number, addr.road].filter(Boolean).join(" ") ||
-              data.display_name ||
-              `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`,
-            city: addr.city || addr.town || addr.village || addr.county || "",
-            postalCode: addr.postcode || "",
-          }));
-          setToast({ type: "success", message: "Live location loaded." });
-        } catch {
-          setForm((f) => ({
-            ...f,
-            address: `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`,
-          }));
-        } finally { setLocationLoading(false); }
-      },
-      () => {
-        setLocationLoading(false);
-        setToast({ type: "error", message: "Unable to access your live location." });
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
   }
 
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  // ── submit ───────────────────────────────────────────────────────────────────
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.pickupDate) {
-      setToast({ type: "error", message: "Please select a pickup date." });
+    if (!allChecked) {
+      setToast({
+        type: "error",
+        message: "Please confirm all checkboxes to continue.",
+      });
       return;
     }
     setSubmitting(true);
@@ -239,7 +276,6 @@ export default function BagScanPage({ code }) {
       const body = isScanMode
         ? { email: scanEmail.trim().toLowerCase(), ...form }
         : { bagCode: code, ...form };
-
       const res = await apiFetch("/api/repeat-pickup", {
         method: "POST",
         body: JSON.stringify(body),
@@ -247,350 +283,816 @@ export default function BagScanPage({ code }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Unable to book pickup.");
       setConfirmed(data.order);
-      setToast({ type: "success", message: "Pickup confirmed!" });
+      setStep(3);
     } catch (err) {
       setToast({ type: "error", message: err.message });
-    } finally { setSubmitting(false); }
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function resetForm() {
     setConfirmed(null);
     setForm(defaultForm);
+    setChecks({ sorted: false, noSpecial: false, understand: false });
     if (isScanMode) {
       setCustomer(null);
       setScanEmail("");
       setEmailNotFound(false);
+      setStep(0);
+    } else {
+      setStep(1);
     }
   }
 
-  return (
-    <div className="relative overflow-x-hidden">
-      <PageGlow />
-      <TopNav ctaHref="/book" ctaLabel="Book now" compact />
+  const addressString = [
+    form.address,
+    [form.postalCode, form.city].filter(Boolean).join(" "),
+  ]
+    .filter(Boolean)
+    .join(", ");
 
-      <main className="mx-auto max-w-5xl px-4 py-14">
-
-        {/* ── SCAN MODE: email step ─────────────────────────────────────────── */}
-        {isScanMode && !customer && !confirmed && (
-          <div className="mx-auto max-w-md">
-            <CardShell
-              eyebrow="Bag Scan"
-              title="Welcome back"
-              description="Enter the email you registered with to load your details and schedule a pickup."
-            >
-              <form onSubmit={handleEmailLookup} className="space-y-4">
-                <Input
-                  label="Email address"
+  // ── STEP 0: email entry ──────────────────────────────────────────────────────
+  if (isScanMode && step === 0) {
+    return (
+      <div className="min-h-screen bg-[#fbf4ea]">
+        <PageGlow />
+        <TopNav ctaHref="/book" ctaLabel="Book now" compact />
+        <MobileHeader onClose={() => {}} />
+        <main className="mx-auto max-w-md px-5 pb-16 lg:pt-8">
+          <div className="pb-6 pt-4">
+            <p className="text-xs font-extrabold uppercase tracking-widest text-sand-500">
+              Bag Scan
+            </p>
+            <h1 className="mt-2 font-display text-[2rem] leading-tight text-sand-900">
+              Welcome back
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-sand-600">
+              Enter your email to load your details and schedule a pickup.
+            </p>
+          </div>
+          <form onSubmit={handleEmailLookup} className="space-y-4">
+            <div className="rounded-2xl border border-sand-200 bg-white px-4 py-5 shadow-soft">
+              <label className="flex flex-col gap-2">
+                <span className="text-xs font-semibold text-sand-500">
+                  Email address
+                </span>
+                <input
                   type="email"
                   value={scanEmail}
                   onChange={(e) => setScanEmail(e.target.value)}
                   required
+                  className="bg-transparent text-sm text-sand-900 outline-none placeholder:text-sand-300"
+                  placeholder="you@example.com"
                 />
-                {emailNotFound && (
-                  <p className="text-sm text-red-600">
-                    No account found.{" "}
-                    <Link href="/book" className="font-extrabold underline">
-                      Register here
-                    </Link>
-                  </p>
-                )}
-                <ActionButton type="submit" disabled={emailLoading}>
-                  {emailLoading ? "Looking up…" : "Continue"}
-                </ActionButton>
-              </form>
-            </CardShell>
-          </div>
-        )}
-
-        {/* ── BAGCODE MODE: loading ─────────────────────────────────────────── */}
-        {loading && (
-          <p className="text-center text-sand-600">Looking up your bag…</p>
-        )}
-
-        {/* ── BAGCODE MODE: not found ───────────────────────────────────────── */}
-        {notFound && !loading && !isScanMode && (
-          <div className="mx-auto max-w-md rounded-[2rem] border border-sand-200 bg-white/85 p-8 text-center shadow-soft">
-            <p className="font-display text-4xl text-sand-900">Bag not found</p>
-            <p className="mt-4 text-sm text-sand-700">
-              The code <span className="font-extrabold">{code}</span> is not linked to any account.
-            </p>
-            <div className="mt-6">
-              <Link href="/book">
-                <ActionButton asChild>Register &amp; book</ActionButton>
-              </Link>
+              </label>
             </div>
-          </div>
-        )}
-
-        {/* ── BOOKING FORM ──────────────────────────────────────────────────── */}
-        {customer && !loading && !confirmed && (
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-8 xl:grid-cols-[1.16fr_0.84fr]">
-
-              {/* LEFT COLUMN */}
-              <div className="space-y-6">
-
-                {/* Welcome banner */}
-                <div className="rounded-[2rem] bg-gold-pill p-6 text-white shadow-glow">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-white/75">
-                    Bag detected
-                  </p>
-                  <p className="mt-2 font-display text-4xl leading-none">
-                    Hi, {customer.firstName}!
-                  </p>
-                  <p className="mt-2 text-sm text-white/80">
-                    {customer.address}, {customer.postalCode} {customer.city}
-                  </p>
-                </div>
-
-                {/* Customize order */}
-                <CardShell
-                  eyebrow="Customize order"
-                  title="Customize Your Laundry Order"
-                  description="Choose the pieces and pickup details that need attention. The order summary updates live as you go."
-                >
-                  <div className="space-y-6">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Input
-                        label="Pickup date"
-                        type="date"
-                        value={form.pickupDate}
-                        min={tomorrow()}
-                        onChange={(e) => set("pickupDate", e.target.value)}
-                        required
-                      />
-                      <div className="space-y-2">
-                        <span className="text-sm font-semibold text-sand-700">Time window</span>
-                        <div className="flex flex-wrap gap-3">
-                          {bookingSlots.map((slot) => (
-                            <RadioPill
-                              key={slot}
-                              active={form.pickupSlot === slot}
-                              onClick={() => set("pickupSlot", slot)}
-                            >
-                              {slot}
-                            </RadioPill>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <span className="text-sm font-semibold text-sand-700">Laundry type</span>
-                      <div className="grid gap-4 md:grid-cols-3">
-                        {laundryTypes.map((type) => (
-                          <LaundryTypeCard
-                            key={type.value}
-                            active={form.laundryType === type.value}
-                            label={type.label}
-                            description="Standard wash & fold"
-                            onClick={() => set("laundryType", type.value)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <span className="text-sm font-semibold text-sand-700">Billing plan</span>
-                      <div className="flex flex-wrap gap-3">
-                        <RadioPill
-                          active={form.billingPlan === "single"}
-                          onClick={() => set("billingPlan", "single")}
-                        >
-                          Standard laundry bag • CHF 55
-                        </RadioPill>
-                        <RadioPill
-                          active={form.billingPlan === "subscription"}
-                          onClick={() => set("billingPlan", "subscription")}
-                        >
-                          Premium plan • CHF 50
-                        </RadioPill>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-5 md:grid-cols-2">
-                      <CounterCard
-                        title="Shirts / Blouses"
-                        subtitle="Washed & finished"
-                        price="+ CHF 4 / piece"
-                        count={form.shirtsCount}
-                        active={Number(form.shirtsCount) > 0}
-                        onDecrease={() =>
-                          set("shirtsCount", String(Math.max(0, Number(form.shirtsCount) - 1)))
-                        }
-                        onIncrease={() =>
-                          set("shirtsCount", String(Number(form.shirtsCount) + 1))
-                        }
-                      />
-                      <article className="rounded-[1.8rem] border border-sand-200 bg-white/80 p-5">
-                        <div className="flex items-start gap-3">
-                          <span className="mt-1 text-sand-600">⌁</span>
-                          <div>
-                            <h4 className="font-display text-3xl leading-none">Smart Pickup</h4>
-                            <p className="mt-2 text-sm leading-7 text-sand-600">
-                              Your bag is automatically recognised. No repeated address entry
-                              is needed for future pickups.
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-6 rounded-[1.2rem] bg-sand-50 px-4 py-4 text-sm text-sand-700">
-                          Clean repeat UX with one bag identity, one account, and one
-                          monthly billing flow.
-                        </div>
-                      </article>
-                    </div>
-
-                    <Textarea
-                      label="Additional instructions"
-                      value={form.notes}
-                      onChange={(e) => set("notes", e.target.value)}
-                      placeholder="Optional notes for the driver or cleaning team…"
-                    />
-                  </div>
-                </CardShell>
-              </div>
-
-              {/* RIGHT COLUMN */}
-              <div className="space-y-6">
-
-                {/* Editable address / profile */}
-                <CardShell
-                  eyebrow="Collection details"
-                  title="Tell us where to collect"
-                  description="Your saved details are pre-filled. Update them if anything has changed."
-                >
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Input
-                      label="First name"
-                      value={form.firstName}
-                      onChange={(e) => set("firstName", e.target.value)}
-                    />
-                    <Input
-                      label="Last name"
-                      value={form.lastName}
-                      onChange={(e) => set("lastName", e.target.value)}
-                    />
-                    <div className="md:col-span-2 flex flex-wrap items-end gap-3">
-                      <Input
-                        label="Address"
-                        className="min-w-[220px] flex-1"
-                        value={form.address}
-                        onChange={(e) => set("address", e.target.value)}
-                      />
-                      <button
-                        type="button"
-                        onClick={useLiveLocation}
-                        disabled={locationLoading}
-                        className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3 text-sm font-extrabold text-sand-800"
-                      >
-                        {locationLoading ? "Locating…" : "Use live location"}
-                      </button>
-                    </div>
-                    <Input
-                      label="Postal code"
-                      value={form.postalCode}
-                      onChange={(e) => set("postalCode", e.target.value)}
-                    />
-                    <Input
-                      label="City"
-                      value={form.city}
-                      onChange={(e) => set("city", e.target.value)}
-                    />
-                    <Input
-                      label="Phone"
-                      className="md:col-span-2"
-                      value={form.phone}
-                      onChange={(e) => set("phone", e.target.value)}
-                    />
-                  </div>
-                </CardShell>
-
-                {/* Order summary */}
-                <div className="rounded-[2rem] border border-sand-200 bg-white/92 p-6 shadow-glow">
-                  <h3 className="font-display text-4xl leading-none">Your Order Summary</h3>
-                  <div className="mt-5 space-y-4 border-t border-sand-100 pt-5">
-                    <SummaryRow
-                      label={
-                        form.billingPlan === "subscription"
-                          ? "Premium laundry plan"
-                          : "Standard laundry bag"
-                      }
-                      value={formatCurrency(summary.base)}
-                    />
-                    <SummaryRow
-                      label={`Shirts / Blouses x ${form.shirtsCount || 0}`}
-                      value={formatCurrency(summary.shirts)}
-                    />
-                  </div>
-                  <div className="mt-8 border-t border-sand-100 pt-5">
-                    <SummaryRow label="Total" value={formatCurrency(summary.total)} strong />
-                  </div>
-                  <div className="mt-6">
-                    <ActionButton type="submit" disabled={submitting}>
-                      {submitting ? "Booking…" : "Confirm pickup"}
-                    </ActionButton>
-                  </div>
-                </div>
-
-              </div>
-            </div>
+            {emailNotFound && (
+              <p className="text-sm text-red-600">
+                No account found.{" "}
+                <Link href="/book" className="font-extrabold underline">
+                  Register here
+                </Link>
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={emailLoading}
+              className="w-full rounded-full bg-gold-pill py-4 text-sm font-extrabold text-white shadow-glow disabled:opacity-60"
+            >
+              {emailLoading ? "Looking up…" : "Continue"}
+            </button>
           </form>
-        )}
+        </main>
+        <Toast toast={toast} />
+      </div>
+    );
+  }
 
-        {/* ── CONFIRMATION ──────────────────────────────────────────────────── */}
-        {confirmed && (
-          <div className="mx-auto max-w-lg rounded-[2rem] border border-sand-200 bg-white/90 p-8 shadow-soft">
-            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-sand-500">
-              Confirmed
-            </p>
-            <h2 className="mt-3 font-display text-5xl leading-none text-sand-900">
-              Pickup booked!
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-sand-700">
-              Place your bag outside the door in the morning. We will collect it and return
-              it clean within 48 hours.
-            </p>
+  // ── LOADING / NOT FOUND (bagcode mode) ──────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#fbf4ea]">
+        <p className="text-sm text-sand-600">Looking up your bag…</p>
+      </div>
+    );
+  }
 
-            <div className="mt-6 space-y-3 rounded-[1.6rem] bg-sand-50 p-5">
-              <SummaryRow label="Invoice" value={confirmed.invoiceNumber} strong />
-              <SummaryRow label="Pickup date" value={formatPickupDate(confirmed.pickupDate)} />
-              <SummaryRow label="Time window" value={confirmed.pickupSlot} />
-              <SummaryRow label="Laundry type" value={capitalize(confirmed.laundryType || "")} />
-              {Number(confirmed.shirtsCount) > 0 && (
-                <SummaryRow label="Shirts / Blouses" value={`x ${confirmed.shirtsCount}`} />
-              )}
-              <SummaryRow label="Amount" value={confirmed.amount} strong />
-              <SummaryRow label="Return" value={confirmed.returnWindow} />
+  if (notFound) {
+    return (
+      <div className="min-h-screen bg-[#fbf4ea]">
+        <PageGlow />
+        <TopNav ctaHref="/book" ctaLabel="Book now" compact />
+        <MobileHeader />
+        <main className="mx-auto max-w-md px-5 py-12 text-center">
+          <p className="font-display text-4xl text-sand-900">Bag not found</p>
+          <p className="mt-4 text-sm text-sand-700">
+            The code <span className="font-extrabold">{code}</span> is not
+            linked to any account.
+          </p>
+          <Link
+            href="/book"
+            className="mt-6 inline-flex rounded-full bg-gold-pill px-6 py-3 text-sm font-extrabold text-white shadow-glow"
+          >
+            Register &amp; book
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
+  // ── STEP 1: booking form ─────────────────────────────────────────────────────
+  if (step === 1 && customer) {
+    const addressCard = (
+      <div className="mb-6 flex items-center gap-3 rounded-2xl border border-sand-200 bg-white px-4 py-4 shadow-soft">
+        <span className="flex-shrink-0 text-sand-500">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+          >
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-sand-900">
+            {addressString || `${customer.firstName} ${customer.lastName}`}
+          </p>
+          <p className="mt-0.5 text-xs text-sand-400">Automatically detected</p>
+        </div>
+      </div>
+    );
+
+    const pickupSection = (
+      <>
+        <p className="mb-3 text-sm font-extrabold text-sand-800">
+          Next available pickup
+        </p>
+        <div className="mb-4 rounded-2xl border border-sand-200 bg-white px-4 py-4 shadow-soft">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-display text-xl text-sand-900">
+                {formatShortDate(form.pickupDate)}
+              </p>
+              <p className="mt-1 text-xs text-sand-400">Pickup until 13:00</p>
+            </div>
+            <span className="rounded-full bg-sand-100 px-3 py-1 text-xs font-extrabold text-sand-600">
+              Available
+            </span>
+          </div>
+        </div>
+        <div className="mb-6 flex gap-2">
+          {bookingSlots.map((slot) => (
+            <button
+              key={slot}
+              type="button"
+              onClick={() => set("pickupSlot", slot)}
+              className={`flex-1 rounded-2xl border py-3 text-xs font-semibold transition ${
+                form.pickupSlot === slot
+                  ? "border-sand-600 bg-gold-pill text-white shadow-soft"
+                  : "border-sand-200 bg-white text-sand-700"
+              }`}
+            >
+              {form.pickupSlot === slot && "✓ "}
+              {slot}
+            </button>
+          ))}
+        </div>
+      </>
+    );
+
+    const laundrySection = (
+      <>
+        <p className="mb-3 text-sm font-extrabold text-sand-800">
+          Choose laundry type
+        </p>
+        <div className="mb-6 grid grid-cols-3 gap-3">
+          {LAUNDRY_TYPES.map(({ value, label, Icon }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => set("laundryType", value)}
+              className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition ${
+                form.laundryType === value
+                  ? "border-sand-600 bg-gradient-to-br from-sand-600 to-sand-800 text-white shadow-soft"
+                  : "border-sand-200 bg-white text-sand-800"
+              }`}
+            >
+              <Icon />
+              <span className="text-xs font-extrabold">{label}</span>
+            </button>
+          ))}
+        </div>
+      </>
+    );
+
+    return (
+      <div className="min-h-screen bg-[#fbf4ea]">
+        <PageGlow />
+        <TopNav ctaHref="/book" ctaLabel="Book now" compact />
+        <MobileHeader
+          onBack={
+            isScanMode
+              ? () => {
+                  setCustomer(null);
+                  setStep(0);
+                }
+              : undefined
+          }
+        />
+        <main className="mx-auto max-w-5xl px-5 pb-16 lg:pt-8">
+          <div className="pb-5 pt-2">
+            <p className="text-xs font-extrabold uppercase tracking-widest text-sand-500">
+              Bag detected
+            </p>
+            <h1 className="mt-2 font-display text-[2rem] leading-tight text-sand-900 lg:text-5xl">
+              Have your laundry picked up
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-sand-600">
+              Address automatically detected – just choose the time.
+            </p>
+          </div>
+
+          {/* ── Mobile layout ── */}
+          <div className="lg:hidden">
+            {addressCard}
+            {pickupSection}
+            {laundrySection}
+            <input
+              type="text"
+              placeholder="Note (optional)"
+              value={form.notes}
+              onChange={(e) => set("notes", e.target.value)}
+              className="mb-5 w-full rounded-2xl border border-sand-200 bg-white px-4 py-3 text-sm text-sand-700 outline-none placeholder:text-sand-300 focus:border-sand-400"
+            />
+            <div className="mb-8 flex items-center gap-2 text-xs text-sand-500">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              Return within 48h between 18:00–21:00
+            </div>
+            <button
+              type="button"
+              onClick={() => setStep(2)}
+              className="mb-3 w-full rounded-full bg-gold-pill py-4 text-sm font-extrabold text-white shadow-glow"
+            >
+              Pick up laundry
+            </button>
+            <p className="text-center text-xs text-sand-400">
+              No re-entry of address required
+            </p>
+          </div>
+
+          {/* ── Desktop layout ── */}
+          <div className="hidden lg:grid lg:grid-cols-[1fr_380px] lg:gap-8">
+            {/* Left col */}
+            <div>
+              {addressCard}
+              {pickupSection}
+              {laundrySection}
+              <input
+                type="text"
+                placeholder="Note (optional)"
+                value={form.notes}
+                onChange={(e) => set("notes", e.target.value)}
+                className="w-full rounded-2xl border border-sand-200 bg-white px-4 py-3 text-sm text-sand-700 outline-none placeholder:text-sand-300 focus:border-sand-400"
+              />
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/">
-                <ActionButton asChild variant="secondary">Back to home</ActionButton>
-              </Link>
-              {confirmed.invoiceUrl && (
-                <a
-                  href={confirmed.invoiceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center rounded-full bg-sand-900 px-5 py-3 text-sm font-extrabold text-white transition hover:-translate-y-0.5"
-                >
-                  Print invoice
-                </a>
-              )}
+            {/* Right col — sticky summary */}
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-sand-200 bg-white p-6 shadow-soft">
+                <p className="text-xs font-extrabold uppercase tracking-widest text-sand-500">
+                  Order summary
+                </p>
+                <div className="mt-4 space-y-3 border-t border-sand-100 pt-4 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-sand-500">Address</span>
+                    <span className="max-w-[160px] text-right font-semibold text-sand-900">
+                      {addressString}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sand-500">Pickup</span>
+                    <span className="font-semibold text-sand-900">
+                      {formatShortDate(form.pickupDate)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sand-500">Time</span>
+                    <span className="font-semibold text-sand-900">
+                      {form.pickupSlot}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sand-500">Laundry</span>
+                    <span className="font-semibold text-sand-900">
+                      {LAUNDRY_LABEL[form.laundryType]}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2 rounded-xl bg-sand-50 px-3 py-2 text-xs text-sand-500">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                  </svg>
+                  Return within 48h between 18:00–21:00
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={resetForm}
-                className="inline-flex items-center justify-center rounded-full border border-sand-200 bg-white/85 px-5 py-3 text-sm font-extrabold text-sand-900 transition hover:-translate-y-0.5"
+                onClick={() => setStep(2)}
+                className="w-full rounded-full bg-gold-pill py-4 text-sm font-extrabold text-white shadow-glow transition hover:-translate-y-0.5"
               >
-                Book another
+                Pick up laundry
+              </button>
+              <p className="text-center text-xs text-sand-400">
+                No re-entry of address required
+              </p>
+            </div>
+          </div>
+        </main>
+        <Toast toast={toast} />
+      </div>
+    );
+  }
+
+  // ── STEP 2: review ───────────────────────────────────────────────────────────
+  if (step === 2 && customer) {
+    const summaryCard = (
+      <div className="rounded-2xl border border-sand-200 bg-white px-5 shadow-soft">
+        <DetailRow
+          icon={
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+              <circle cx="12" cy="9" r="2" />
+            </svg>
+          }
+          label="Address"
+          value={addressString}
+        />
+        <DetailRow
+          icon={
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          }
+          label="Pickup"
+          value={formatShortDate(form.pickupDate)}
+        />
+        <DetailRow
+          icon={
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+          }
+          label="Time"
+          value={form.pickupSlot}
+        />
+        <DetailRow
+          icon={
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z" />
+            </svg>
+          }
+          label="Laundry type"
+          value={LAUNDRY_LABEL[form.laundryType] || form.laundryType}
+        />
+        <DetailRow
+          icon={
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <rect x="2" y="7" width="20" height="14" rx="2" />
+              <path d="M16 7V5a2 2 0 00-4 0v2" />
+            </svg>
+          }
+          label="Return"
+          value="In 48h between 18:00–21:00"
+        />
+      </div>
+    );
+
+    const shirtsCard = (
+      <div className="flex items-center justify-between rounded-2xl border border-sand-200 bg-white px-5 py-4 shadow-soft">
+        <div className="flex items-center gap-3">
+          <span className="text-sand-500">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z" />
+            </svg>
+          </span>
+          <span className="text-sm font-semibold text-sand-900">
+            Shirts / Blouses
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() =>
+              set(
+                "shirtsCount",
+                String(Math.max(0, Number(form.shirtsCount) - 1)),
+              )
+            }
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-200 font-bold text-sand-700"
+          >
+            −
+          </button>
+          <span className="w-5 text-center text-sm font-extrabold text-sand-900">
+            {form.shirtsCount}
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              set("shirtsCount", String(Number(form.shirtsCount) + 1))
+            }
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-sand-200 font-bold text-sand-700"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    );
+
+    const notesCard = (
+      <div className="rounded-2xl border border-sand-200 bg-white px-5 py-4 shadow-soft">
+        <div className="mb-3 flex items-center gap-2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            className="text-sand-500"
+          >
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+          </svg>
+          <span className="text-xs font-semibold text-sand-500">Note</span>
+        </div>
+        <input
+          type="text"
+          placeholder="Optional note"
+          value={form.notes}
+          onChange={(e) => set("notes", e.target.value)}
+          className="w-full rounded-xl border border-sand-100 bg-sand-50 px-3 py-2 text-sm text-sand-700 outline-none placeholder:text-sand-300"
+        />
+      </div>
+    );
+
+    const billingCard = (
+      <div className="flex items-start gap-3 rounded-2xl bg-sand-200/40 px-5 py-4">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className="mt-0.5 flex-shrink-0 text-sand-600"
+        >
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        <div>
+          <p className="text-sm font-extrabold text-sand-800">Billing</p>
+          <p className="mt-1 text-xs leading-relaxed text-sand-600">
+            Your order is collected and conveniently billed at the end of the
+            month by email.
+          </p>
+        </div>
+      </div>
+    );
+
+    const checkboxes = (
+      <div className="divide-y divide-sand-100 border-t border-sand-100">
+        {[
+          { key: "sorted", label: "My laundry is pre-sorted." },
+          {
+            key: "noSpecial",
+            label: "There are no special care items in the bag.",
+          },
+          {
+            key: "understand",
+            label:
+              "I understand that Laundry.li washes the items as submitted.",
+          },
+        ].map(({ key, label }) => (
+          <label
+            key={key}
+            className="flex cursor-pointer items-start gap-3 py-4"
+          >
+            <input
+              type="checkbox"
+              checked={checks[key]}
+              onChange={(e) =>
+                setChecks((c) => ({ ...c, [key]: e.target.checked }))
+              }
+              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-sand-700"
+            />
+            <span className="text-sm text-sand-700">{label}</span>
+          </label>
+        ))}
+      </div>
+    );
+
+    const submitBtn = (
+      <form onSubmit={handleSubmit}>
+        <button
+          type="submit"
+          disabled={submitting || !allChecked}
+          className={`w-full rounded-full py-4 text-sm font-extrabold text-white shadow-glow transition ${allChecked && !submitting ? "bg-gold-pill hover:-translate-y-0.5" : "cursor-not-allowed bg-sand-300"}`}
+        >
+          {submitting ? "Booking…" : "Pick up laundry"}
+        </button>
+      </form>
+    );
+
+    return (
+      <div className="min-h-screen bg-[#fbf4ea]">
+        <PageGlow />
+        <TopNav ctaHref="/book" ctaLabel="Book now" compact />
+        <MobileHeader step={2} totalSteps={2} onBack={() => setStep(1)} />
+        <main className="mx-auto max-w-5xl px-5 pb-16 lg:pt-8">
+          <div className="pb-6 pt-2">
+            <p className="text-xs font-extrabold uppercase tracking-widest text-sand-500">
+              Review order
+            </p>
+            <h1 className="mt-2 font-display text-[2rem] leading-tight text-sand-900 lg:text-5xl">
+              Almost done!
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-sand-600">
+              Please check your details – then we'll pick up your laundry bag.
+            </p>
+          </div>
+
+          {/* ── Mobile layout ── */}
+          <div className="space-y-4 lg:hidden">
+            {summaryCard}
+            {shirtsCard}
+            {notesCard}
+            {billingCard}
+            <div className="mb-2">{checkboxes}</div>
+            {submitBtn}
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="w-full text-center text-sm text-sand-500 underline underline-offset-2"
+            >
+              Edit details
+            </button>
+          </div>
+
+          {/* ── Desktop layout ── */}
+          <div className="hidden lg:grid lg:grid-cols-[1fr_380px] lg:gap-8">
+            {/* Left col */}
+            <div className="space-y-4">
+              {summaryCard}
+              {shirtsCard}
+              {notesCard}
+            </div>
+            {/* Right col */}
+            <div className="space-y-4">
+              {billingCard}
+              {checkboxes}
+              {submitBtn}
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="w-full text-center text-sm text-sand-500 underline underline-offset-2"
+              >
+                Edit details
               </button>
             </div>
           </div>
-        )}
-      </main>
+        </main>
+        <Toast toast={toast} />
+      </div>
+    );
+  }
 
-      <Footer />
-      <Toast toast={toast} />
-    </div>
-  );
+  // ── STEP 3: confirmed ────────────────────────────────────────────────────────
+  if (step === 3 && confirmed) {
+    return (
+      <div className="min-h-screen bg-[#fbf4ea]">
+        <PageGlow />
+        <TopNav ctaHref="/book" ctaLabel="Book now" compact />
+        <MobileHeader />
+        <main className="mx-auto max-w-5xl px-5 pb-16 lg:pt-8">
+          {/* Desktop: two columns. Mobile: single centered column */}
+          <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-start">
+            {/* Left (or full-width on mobile) — hero section */}
+            <div className="flex flex-col items-center lg:items-start">
+              <div className="mb-5 mt-8 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-sand-300 to-sand-500 shadow-glow lg:mt-0">
+                <svg
+                  width="34"
+                  height="34"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <h1 className="text-center font-display text-[2.2rem] text-sand-900 lg:text-left lg:text-5xl">
+                Pickup confirmed
+              </h1>
+              <p className="mt-2 text-center text-sm text-sand-500 lg:text-left">
+                Your Laundry Bag will be collected as planned.
+              </p>
+
+              {/* Summary card */}
+              <div className="mt-6 w-full rounded-2xl border border-sand-200 bg-white px-5 shadow-soft">
+                <DetailRow
+                  icon={
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <rect x="3" y="4" width="18" height="18" rx="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                  }
+                  label="Pickup"
+                  value={
+                    <strong>{formatShortDate(confirmed.pickupDate)}</strong>
+                  }
+                />
+                <DetailRow
+                  icon={
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 6v6l4 2" />
+                    </svg>
+                  }
+                  label="Time"
+                  value={<strong>{confirmed.pickupSlot}</strong>}
+                />
+                <DetailRow
+                  icon={
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <rect x="2" y="7" width="20" height="14" rx="2" />
+                      <path d="M16 7V5a2 2 0 00-4 0v2" />
+                    </svg>
+                  }
+                  label="Return"
+                  value={
+                    <strong>
+                      {confirmed.returnWindow || "In 48h between 18:00–21:00"}
+                    </strong>
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Right (or bottom on mobile) — next steps */}
+            <div className="mt-8 lg:mt-0">
+              <p className="text-center font-display text-xl text-sand-900 lg:text-left lg:text-2xl">
+                What you need to do now
+              </p>
+              <div className="mt-4 w-full divide-y divide-sand-100">
+                {[
+                  { emoji: "🛍️", text: "Fill your Laundry Bag" },
+                  { emoji: "🚪", text: "Put it outside in the morning" },
+                  { emoji: "✨", text: "We take care of the rest" },
+                ].map(({ emoji, text }) => (
+                  <div key={text} className="flex items-center gap-4 py-4">
+                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sand-100 text-xl">
+                      {emoji}
+                    </span>
+                    <span className="text-sm font-semibold text-sand-800">
+                      {text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 flex items-center gap-3 rounded-2xl bg-sand-400/20 px-5 py-4">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="flex-shrink-0 text-sand-600"
+                >
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <p className="text-sm font-semibold text-sand-800">
+                  No further action needed – we take care of everything for you.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={resetForm}
+                className="mt-8 w-full rounded-full border-2 border-sand-200 bg-white py-4 text-sm font-extrabold text-sand-900 transition hover:-translate-y-0.5"
+              >
+                Plan new pickup
+              </button>
+              <div className="mt-3 text-center lg:text-left">
+                <Link
+                  href="/"
+                  className="text-sm text-sand-500 underline underline-offset-2"
+                >
+                  To homepage
+                </Link>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Toast toast={toast} />
+      </div>
+    );
+  }
+
+  return null;
 }

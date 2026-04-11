@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 export function formatCurrency(value) {
   return new Intl.NumberFormat("de-CH", {
@@ -42,8 +43,8 @@ export function apiFetch(pathname, options = {}) {
 export function PageGlow() {
   return (
     <>
-      <div className="pointer-events-none fixed left-[-8rem] top-24 h-80 w-80 rounded-full bg-sand-300/50 blur-3xl" />
-      <div className="pointer-events-none fixed right-[-10rem] top-[28rem] h-96 w-96 rounded-full bg-amber-100/70 blur-3xl" />
+      <div className="pointer-events-none fixed left-[-8rem] top-24 h-80 w-80 rounded-full bg-sand-300/50 blur-3xl hidden lg:block" />
+      <div className="pointer-events-none fixed right-[-10rem] top-[28rem] h-96 w-96 rounded-full bg-amber-100/70 blur-3xl hidden lg:block" />
     </>
   );
 }
@@ -55,50 +56,143 @@ export function TopNav({
   userName = "",
   onSignout,
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-40 px-4 pt-5">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 rounded-full border border-sand-200 bg-white/75 px-5 py-4 shadow-glow backdrop-blur">
-        <Link href="/" className="font-display text-4xl font-bold">
-          laundry.li
-        </Link>
-        <nav className="hidden flex-wrap gap-5 text-sm font-semibold text-sand-700 xl:flex">
-          <Link href="/">Home</Link>
-          <Link href="/how-it-works">How it works</Link>
-          <Link href="/book">Book pickup</Link>
-          {!compact ? <Link href="/admin">Admin</Link> : null}
-        </nav>
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          {userName ? (
-            <>
-              <span className="rounded-full border border-sand-200 bg-white px-4 py-2 text-sm font-extrabold text-sand-700">
-                {userName}
-              </span>
-              {onSignout ? (
-                <button
-                  type="button"
-                  onClick={onSignout}
-                  className="text-sm font-extrabold text-sand-700"
-                >
-                  Sign out
-                </button>
-              ) : null}
-            </>
-          ) : null}
-          {!compact ? (
-            <Link
-              href="/admin"
-              className="text-sm font-extrabold text-sand-700"
-            >
-              Admin
-            </Link>
-          ) : null}
-          <Link
-            href={ctaHref}
-            className="inline-flex items-center justify-center rounded-full bg-gold-pill px-5 py-3 text-sm font-extrabold text-white shadow-glow transition hover:-translate-y-0.5"
-          >
-            {ctaLabel}
+    <header className="sticky top-0 z-40">
+      {/* ── Desktop pill nav (lg+) ──────────────────────────── */}
+      <div className="hidden lg:block px-4 pt-5">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 rounded-full border border-sand-200 bg-white/75 px-5 py-4 shadow-glow backdrop-blur">
+          <Link href="/" className="font-display text-4xl font-bold">
+            laundry.li
           </Link>
+          <nav className="hidden flex-wrap gap-5 text-sm font-semibold text-sand-700 xl:flex">
+            <Link href="/">Home</Link>
+            <Link href="/services">Services</Link>
+            <Link href="/pricing">Pricing</Link>
+            <Link href="/preparation">Preparation</Link>
+            <Link href="/how-it-works">How it works</Link>
+            <Link href="/book">Book pickup</Link>
+            {!compact ? <Link href="/admin">Admin</Link> : null}
+          </nav>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            {userName ? (
+              <>
+                <span className="rounded-full border border-sand-200 bg-white px-4 py-2 text-sm font-extrabold text-sand-700">
+                  {userName}
+                </span>
+                {onSignout ? (
+                  <button
+                    type="button"
+                    onClick={onSignout}
+                    className="text-sm font-extrabold text-sand-700"
+                  >
+                    Sign out
+                  </button>
+                ) : null}
+              </>
+            ) : null}
+            {!compact ? (
+              <Link
+                href="/admin"
+                className="text-sm font-extrabold text-sand-700"
+              >
+                Admin
+              </Link>
+            ) : null}
+            <Link
+              href={ctaHref}
+              className="inline-flex items-center justify-center rounded-full bg-gold-pill px-5 py-3 text-sm font-extrabold text-white shadow-glow transition hover:-translate-y-0.5"
+            >
+              {ctaLabel}
+            </Link>
+          </div>
         </div>
+      </div>
+
+      {/* ── Mobile nav (below lg) ────────────────────────────── */}
+      <div className="lg:hidden px-5 bg-[#fbf4ea]/90 backdrop-blur">
+        <div className="flex items-center justify-between py-4">
+          <Link href="/" className="font-display text-3xl font-bold">
+            laundry.li
+          </Link>
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="text-sand-900 p-1"
+          >
+            {menuOpen ? (
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {menuOpen && (
+          <div className="pb-4 border-t border-sand-200">
+            <nav className="flex flex-col gap-5 pt-4 text-base font-semibold text-sand-700">
+              <Link href="/" onClick={() => setMenuOpen(false)}>
+                Home
+              </Link>
+              <Link href="/services" onClick={() => setMenuOpen(false)}>
+                Services
+              </Link>
+              <Link href="/pricing" onClick={() => setMenuOpen(false)}>
+                Pricing
+              </Link>
+              <Link href="/preparation" onClick={() => setMenuOpen(false)}>
+                Preparation
+              </Link>
+              <Link href="/how-it-works" onClick={() => setMenuOpen(false)}>
+                How it works
+              </Link>
+              <Link href="/book" onClick={() => setMenuOpen(false)}>
+                Book pickup
+              </Link>
+              {!compact ? (
+                <Link href="/admin" onClick={() => setMenuOpen(false)}>
+                  Admin
+                </Link>
+              ) : null}
+            </nav>
+            <div className="mt-5">
+              <Link
+                href={ctaHref}
+                onClick={() => setMenuOpen(false)}
+                className="inline-flex w-full items-center justify-center rounded-full bg-gold-pill px-5 py-3 text-sm font-extrabold text-white shadow-glow"
+              >
+                {ctaLabel}
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
