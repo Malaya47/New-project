@@ -175,7 +175,7 @@ export default function HomePage() {
         <div className="lg:hidden flex-shrink-0 grid grid-cols-3 divide-x divide-sand-200 border-t border-sand-200 bg-[#fbf4ea] py-5">
           <div className="flex flex-col items-center gap-3">
             <Image
-              src="/images/Group 10.png"
+              src="/images/Group 11.png"
               alt="Washing"
               width={56}
               height={56}
@@ -187,7 +187,7 @@ export default function HomePage() {
           </div>
           <div className="flex flex-col items-center gap-3">
             <Image
-              src="/images/Group 12.png"
+              src="/images/Group 10.png"
               alt="Ironing"
               width={56}
               height={56}
@@ -199,7 +199,7 @@ export default function HomePage() {
           </div>
           <div className="flex flex-col items-center gap-3">
             <Image
-              src="/images/Group 11 (1).png"
+              src="/images/Group 12.png"
               alt="Folding"
               width={56}
               height={56}
