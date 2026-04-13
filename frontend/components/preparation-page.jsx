@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Footer, PageGlow, TopNav } from "./shared-ui";
+import { t } from "../lib/translations";
 
 const rules = [
   {
-    title: "Prepare your laundry",
+    title: t("Prepare your laundry"),
     icon: (
       <svg
         width="28"
@@ -22,13 +23,13 @@ const rules = [
       </svg>
     ),
     items: [
-      "Sort light, dark and coloured separately",
-      "Normal everyday laundry only",
-      "Do not overfill the bag",
+      t("Sort light, dark and coloured separately"),
+      t("Normal everyday laundry only"),
+      t("Do not overfill the bag"),
     ],
   },
   {
-    title: "Important to know",
+    title: t("Important to know"),
     icon: (
       <svg
         width="28"
@@ -47,13 +48,13 @@ const rules = [
       </svg>
     ),
     items: [
-      "We wash as handed in",
-      "No sorting of individual items",
-      "Mixed laundry is washed together",
+      t("We wash as handed in"),
+      t("No sorting of individual items"),
+      t("Mixed laundry is washed together"),
     ],
   },
   {
-    title: "Not suitable",
+    title: t("Not suitable"),
     icon: (
       <svg
         width="28"
@@ -71,9 +72,9 @@ const rules = [
       </svg>
     ),
     items: [
-      "Silk, wool, leather",
-      "Duvets, pillows, curtains",
-      "Heavily soiled clothing",
+      t("Silk, wool, leather"),
+      t("Duvets, pillows, curtains"),
+      t("Heavily soiled clothing"),
     ],
   },
 ];
@@ -82,7 +83,7 @@ export default function PreparationPage() {
   return (
     <div className="relative overflow-x-hidden min-h-screen bg-hero-wash">
       <PageGlow />
-      <TopNav ctaHref="/book" ctaLabel="Book now" />
+      <TopNav ctaHref="/book" ctaLabel={t("Book now")} />
 
       <main className="mx-auto max-w-2xl px-4 pb-16 pt-10">
         {/* ── Header ─────────────────────────────────────── */}
@@ -90,17 +91,19 @@ export default function PreparationPage() {
           <div className="mb-3 flex items-center justify-center gap-3">
             <div className="h-px w-8 bg-sand-400" />
             <span className="font-display text-xs italic font-semibold tracking-widest text-sand-500">
-              Preparation &amp; Guidelines
+              {t("Preparation & Guidelines")}
             </span>
             <div className="h-px w-8 bg-sand-400" />
           </div>
           <h1 className="font-display text-3xl font-bold leading-tight text-sand-900 sm:text-4xl">
-            Simply prepare –<br />
-            we handle the rest
+            {t("Simply prepare –")}
+            <br />
+            {t("we handle the rest")}
           </h1>
           <p className="mt-3 mx-auto max-w-xs text-sm leading-relaxed text-sand-600 sm:max-w-md sm:text-base">
-            With a few simple rules we make sure your laundry comes back
-            perfectly.
+            {t(
+              "With a few simple rules we make sure your laundry comes back perfectly.",
+            )}
           </p>
         </div>
 
@@ -155,30 +158,30 @@ export default function PreparationPage() {
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
           <p className="text-xs italic leading-relaxed text-sand-500 sm:text-sm">
-            If in doubt: just ask us quickly — we are happy to help.
+            {t("If in doubt: just ask us quickly — we are happy to help.")}
           </p>
         </div>
 
         {/* ── CTA card ───────────────────────────────────── */}
         <div className="mt-6 overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#c89761,#7a5030)] px-6 py-8 text-center shadow-glow">
           <h2 className="font-display text-2xl font-bold leading-tight text-white sm:text-3xl">
-            Ready for less effort?
+            {t("Ready for less effort?")}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-white/80">
-            Start now and leave your laundry to us.
+            {t("Start now and leave your laundry to us.")}
           </p>
           <Link
             href="/book"
             className="mt-5 inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[linear-gradient(135deg,#f5e6cc,#e8c98a)] px-6 py-3.5 font-display text-base font-bold text-sand-900 shadow-soft transition hover:-translate-y-0.5"
           >
-            Book now
+            {t("Book now")}
           </Link>
           <div className="mt-4">
             <Link
               href="/how-it-works"
               className="text-xs text-white/70 underline underline-offset-2 transition hover:text-white"
             >
-              View how it works again
+              {t("View how it works again")}
             </Link>
           </div>
         </div>

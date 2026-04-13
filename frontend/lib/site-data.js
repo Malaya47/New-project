@@ -1,82 +1,91 @@
+import { t } from "./translations";
+
 export const services = [
   {
-    title: "Washing",
-    description:
+    title: t("Washing"),
+    description: t(
       "Deep cleaning for your daily clothes. We sort by color and fabric type to ensure perfect results.",
+    ),
   },
   {
-    title: "Drying",
-    description:
+    title: t("Drying"),
+    description: t(
       "Gentle drying, ready for the day. Temperature-controlled cycles protect your garments from shrinking.",
+    ),
   },
   {
-    title: "Ironing",
-    description:
+    title: t("Ironing"),
+    description: t(
       "Perfectly pressed for a professional look. Hand-finished detailing for crisp collars and cuffs.",
+    ),
   },
   {
-    title: "Folding",
-    description:
+    title: t("Folding"),
+    description: t(
       "Neatly folded and ready to be put away. Marie Kondo-style folding available upon request.",
+    ),
   },
 ];
 
 export const rules = [
   {
-    title: "Prepare Your Laundry",
+    title: t("Prepare Your Laundry"),
     type: "check",
     items: [
-      "Not sorted, but pre-washed if needed",
-      "Remove delicate items",
-      "Check pockets for loose items",
+      t("Not sorted, but pre-washed if needed"),
+      t("Remove delicate items"),
+      t("Check pockets for loose items"),
     ],
   },
   {
-    title: "What You Should Know",
+    title: t("What You Should Know"),
     type: "check",
     items: [
-      "No liability for valuables left in pockets",
-      "Report special care instructions beforehand",
-      "Check clothing labels for washability",
+      t("No liability for valuables left in pockets"),
+      t("Report special care instructions beforehand"),
+      t("Check clothing labels for washability"),
     ],
   },
   {
-    title: "Not Accepted",
+    title: t("Not Accepted"),
     type: "cross",
     items: [
-      "Silk, wool, leather garments",
-      "Curtains, carpets, large bedding",
-      "Heavily stained or damaged items",
+      t("Silk, wool, leather garments"),
+      t("Curtains, carpets, large bedding"),
+      t("Heavily stained or damaged items"),
     ],
   },
 ];
 
 export const processSteps = [
   {
-    title: "Scan your bag",
-    description:
+    title: t("Scan your bag"),
+    description: t(
       "Your QR-linked laundry bag identifies your account in seconds.",
+    ),
   },
   {
-    title: "Choose a time window",
-    description: "Select the pickup date and slot that fits your routine.",
+    title: t("Choose a time window"),
+    description: t("Select the pickup date and slot that fits your routine."),
   },
   {
-    title: "Place it by the door",
-    description:
+    title: t("Place it by the door"),
+    description: t(
       "Leave the bag outside in the morning for scheduled collection.",
+    ),
   },
   {
-    title: "Receive it back clean",
-    description:
+    title: t("Receive it back clean"),
+    description: t(
       "Your laundry returns washed, finished, and folded within 48 hours.",
+    ),
   },
 ];
 
 export const bookingSlots = ["08:00 - 10:00", "10:00 - 12:00", "12:00 - 13:00"];
 
 export const laundryTypes = [
-  { value: "white", label: "White" },
-  { value: "dark", label: "Dark" },
-  { value: "color", label: "Color" },
+  { value: "white", label: t("White") },
+  { value: "dark", label: t("Dark") },
+  { value: "color", label: t("Color") },
 ];

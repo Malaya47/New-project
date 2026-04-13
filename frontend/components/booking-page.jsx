@@ -13,6 +13,7 @@ import {
   Toast,
   TopNav,
 } from "./shared-ui";
+import { t } from "../lib/translations";
 
 // ─── 6-digit OTP input ────────────────────────────────────────────────────────
 function OtpInput({ value, onChange }) {
@@ -132,7 +133,7 @@ function SidePanel() {
 
         <div className="p-6">
           <h3 className="font-display text-3xl leading-none text-sand-900">
-            How it works
+            {t("How it works")}
           </h3>
           <div className="mt-4 space-y-4">
             <div className="flex items-start gap-3">
@@ -140,8 +141,9 @@ function SidePanel() {
                 1
               </span>
               <p className="text-sm leading-6 text-sand-700">
-                Register with your email. We'll send you a verification code —
-                no password needed.
+                {t(
+                  "Register with your email. We\u2019ll send you a verification code \u2014 no password needed.",
+                )}
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -149,8 +151,9 @@ function SidePanel() {
                 2
               </span>
               <p className="text-sm leading-6 text-sand-700">
-                We ship you a laundry bag with a QR code. Fill it and scan the
-                QR when you're ready.
+                {t(
+                  "We ship you a laundry bag with a QR code. Fill it and scan the QR when you\u2019re ready.",
+                )}
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -158,8 +161,9 @@ function SidePanel() {
                 3
               </span>
               <p className="text-sm leading-6 text-sand-700">
-                Scan the QR on your bag, enter your email, and your details are
-                pre-filled. Choose a pickup slot and confirm.
+                {t(
+                  "Scan the QR on your bag, enter your email, and your details are pre-filled. Choose a pickup slot and confirm.",
+                )}
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -167,7 +171,7 @@ function SidePanel() {
                 4
               </span>
               <p className="text-sm leading-6 text-sand-700">
-                We wash, fold, and return your laundry within 48 hours.
+                {t("We wash, fold, and return your laundry within 48 hours.")}
               </p>
             </div>
           </div>
@@ -175,9 +179,12 @@ function SidePanel() {
       </div>
 
       <div className="rounded-[1.6rem] border border-sand-200 bg-sand-50 p-5 text-sm leading-7 text-sand-700">
-        <span className="font-extrabold text-sand-900">No passwords.</span> Your
-        identity is always verified via a fresh code straight to your inbox.
-        Fast, secure, and hassle-free.
+        <span className="font-extrabold text-sand-900">
+          {t("No passwords.")}
+        </span>{" "}
+        {t(
+          "Your identity is always verified via a fresh code straight to your inbox. Fast, secure, and hassle-free.",
+        )}
       </div>
     </div>
   );
@@ -213,7 +220,7 @@ export default function BookingPage() {
   // ── Live location autofill ────────────────────────────────────────────────
   function detectLocation() {
     if (!navigator.geolocation) {
-      notify("Live location is not supported in this browser.", "error");
+      notify(t("Live location is not supported in this browser."), "error");
       return;
     }
     setLocationLoading(true);
@@ -235,20 +242,23 @@ export default function BookingPage() {
               addr.city || addr.town || addr.village || addr.county || p.city,
             postalCode: addr.postcode || p.postalCode,
           }));
-          notify("Location detected and filled in.");
+          notify(t("Location detected and filled in."));
         } catch {
           setProfile((p) => ({
             ...p,
             address: `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`,
           }));
-          notify("Coordinates added — address lookup unavailable.", "error");
+          notify(
+            t("Coordinates added \u2014 address lookup unavailable."),
+            "error",
+          );
         } finally {
           setLocationLoading(false);
         }
       },
       () => {
         setLocationLoading(false);
-        notify("Unable to access your location.", "error");
+        notify(t("Unable to access your location."), "error");
       },
       { enableHighAccuracy: true, timeout: 10000 },
     );
@@ -259,7 +269,7 @@ export default function BookingPage() {
     e.preventDefault();
     const trimmed = email.trim();
     if (!trimmed) {
-      notify("Enter your email address.", "error");
+      notify(t("Enter your email address."), "error");
       return;
     }
     setLoading(true);
@@ -269,9 +279,9 @@ export default function BookingPage() {
         body: JSON.stringify({ email: trimmed }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send code.");
+      if (!res.ok) throw new Error(data.error || t("Failed to send code."));
       setStep("otp");
-      notify("Check your email for the 6-digit code.");
+      notify(t("Check your email for the 6-digit code."));
     } catch (err) {
       notify(err.message, "error");
     } finally {
@@ -283,7 +293,7 @@ export default function BookingPage() {
   async function handleVerifyOtp(e) {
     e.preventDefault();
     if (otp.replace(/\D/g, "").length !== 6) {
-      notify("Enter the complete 6-digit code.", "error");
+      notify(t("Enter the complete 6-digit code."), "error");
       return;
     }
     setLoading(true);
@@ -293,9 +303,9 @@ export default function BookingPage() {
         body: JSON.stringify({ email: email.trim(), otp }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Verification failed.");
+      if (!res.ok) throw new Error(data.error || t("Verification failed."));
       setStep("profile");
-      notify("Email verified. Fill in your details.");
+      notify(t("Email verified. Fill in your details."));
     } catch (err) {
       notify(err.message, "error");
     } finally {
@@ -307,7 +317,7 @@ export default function BookingPage() {
   async function handleRegister(e) {
     e.preventDefault();
     if (!profile.firstName || !profile.lastName || !profile.address) {
-      notify("Please fill in all required fields.", "error");
+      notify(t("Please fill in all required fields."), "error");
       return;
     }
     setLoading(true);
@@ -317,7 +327,7 @@ export default function BookingPage() {
         body: JSON.stringify({ email: email.trim(), ...profile }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Registration failed.");
+      if (!res.ok) throw new Error(data.error || t("Registration failed."));
       setStep("done");
     } catch (err) {
       notify(err.message, "error");
@@ -335,8 +345,8 @@ export default function BookingPage() {
         body: JSON.stringify({ email: email.trim() }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to resend code.");
-      notify("A new code has been sent to your email.");
+      if (!res.ok) throw new Error(data.error || t("Failed to resend code."));
+      notify(t("A new code has been sent to your email."));
     } catch (err) {
       notify(err.message, "error");
     } finally {
@@ -353,13 +363,15 @@ export default function BookingPage() {
     return (
       <div className="grid gap-8 xl:grid-cols-[1fr_0.9fr]">
         <CardShell
-          eyebrow="Step 1 of 3"
-          title="Enter your email"
-          description="We'll send a one-time verification code to your inbox. No password needed."
+          eyebrow={t("Step 1 of 3")}
+          title={t("Enter your email")}
+          description={t(
+            "We\u2019ll send a one-time verification code to your inbox. No password needed.",
+          )}
         >
           <form onSubmit={handleSendOtp} className="space-y-5">
             <Input
-              label="Email address"
+              label={t("Email address")}
               type="email"
               value={email}
               autoComplete="email"
@@ -367,7 +379,7 @@ export default function BookingPage() {
               required
             />
             <ActionButton type="submit" disabled={loading}>
-              {loading ? "Sending code\u2026" : "Send verification code"}
+              {loading ? t("Sending code\u2026") : t("Send verification code")}
             </ActionButton>
           </form>
         </CardShell>
@@ -381,14 +393,14 @@ export default function BookingPage() {
     return (
       <div className="grid gap-8 xl:grid-cols-[1fr_0.9fr]">
         <CardShell
-          eyebrow="Step 2 of 3"
-          title="Enter your code"
-          description={`We sent a 6-digit code to ${email}. It expires in 10 minutes.`}
+          eyebrow={t("Step 2 of 3")}
+          title={t("Enter your code")}
+          description={`${t("We sent a 6-digit code to")} ${email}. ${t("It expires in 10 minutes.")}`}
         >
           <form onSubmit={handleVerifyOtp} className="space-y-6">
             <OtpInput value={otp} onChange={setOtp} />
             <ActionButton type="submit" disabled={loading || otp.length < 6}>
-              {loading ? "Verifying\u2026" : "Verify code"}
+              {loading ? t("Verifying\u2026") : t("Verify code")}
             </ActionButton>
             <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
               <button
@@ -396,7 +408,7 @@ export default function BookingPage() {
                 onClick={() => setStep("email")}
                 className="font-semibold text-sand-600"
               >
-                \u2190 Change email
+                \u2190 {t("Change email")}
               </button>
               <button
                 type="button"
@@ -404,7 +416,7 @@ export default function BookingPage() {
                 disabled={loading}
                 className="font-semibold text-sand-600"
               >
-                Resend code
+                {t("Resend code")}
               </button>
             </div>
           </form>
@@ -419,14 +431,16 @@ export default function BookingPage() {
     return (
       <div className="grid gap-8 xl:grid-cols-[1fr_0.9fr]">
         <CardShell
-          eyebrow="Step 3 of 3"
-          title="Your details"
-          description="We need these to deliver your bag and schedule pickups."
+          eyebrow={t("Step 3 of 3")}
+          title={t("Your details")}
+          description={t(
+            "We need these to deliver your bag and schedule pickups.",
+          )}
         >
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
-                label="First name *"
+                label={t("First name *")}
                 value={profile.firstName}
                 autoComplete="given-name"
                 onChange={(e) =>
@@ -435,7 +449,7 @@ export default function BookingPage() {
                 required
               />
               <Input
-                label="Last name *"
+                label={t("Last name *")}
                 value={profile.lastName}
                 autoComplete="family-name"
                 onChange={(e) =>
@@ -447,7 +461,7 @@ export default function BookingPage() {
 
             <div className="flex flex-wrap items-end gap-3">
               <Input
-                label="Street address *"
+                label={t("Street address *")}
                 className="min-w-[220px] flex-1"
                 value={profile.address}
                 autoComplete="street-address"
@@ -462,13 +476,13 @@ export default function BookingPage() {
                 disabled={locationLoading}
                 className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3 text-sm font-extrabold text-sand-800 transition hover:-translate-y-0.5 disabled:opacity-60"
               >
-                {locationLoading ? "Locating…" : "Detect location"}
+                {locationLoading ? t("Locating\u2026") : t("Detect location")}
               </button>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Input
-                label="Postal code"
+                label={t("Postal code")}
                 value={profile.postalCode}
                 autoComplete="postal-code"
                 onChange={(e) =>
@@ -476,7 +490,7 @@ export default function BookingPage() {
                 }
               />
               <Input
-                label="City"
+                label={t("City")}
                 value={profile.city}
                 autoComplete="address-level2"
                 onChange={(e) =>
@@ -486,7 +500,7 @@ export default function BookingPage() {
             </div>
 
             <Input
-              label="Phone number"
+              label={t("Phone number")}
               type="tel"
               value={profile.phone}
               autoComplete="tel"
@@ -496,7 +510,7 @@ export default function BookingPage() {
             />
 
             <ActionButton type="submit" disabled={loading}>
-              {loading ? "Saving\u2026" : "Complete registration"}
+              {loading ? t("Saving\u2026") : t("Complete registration")}
             </ActionButton>
           </form>
         </CardShell>
@@ -518,50 +532,51 @@ export default function BookingPage() {
             laundry.li
           </p>
           <h2 className="mt-3 font-display text-5xl leading-none">
-            You'll receive your bag!
+            {t("You'll receive your bag!")}
           </h2>
           <p className="mt-4 text-base leading-8 text-sand-700">
-            We've registered your details. Your laundry bag is on its way to
-            you. It will have a QR code attached — scan it when you're ready to
-            schedule your first pickup.
+            {t(
+              "We've registered your details. Your laundry bag is on its way. It will have a QR code — scan it when you're ready to schedule your first pickup.",
+            )}
           </p>
 
           <div className="mt-8 rounded-[1.5rem] border border-sand-200 bg-sand-50 p-5 text-left">
             <h3 className="font-display text-2xl leading-none text-sand-900">
-              What happens next?
+              {t("What happens next?")}
             </h3>
             <ul className="mt-4 space-y-3 text-sm leading-7 text-sand-700">
               <li className="flex items-start gap-3">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sand-200 text-xs font-extrabold text-sand-900">
                   1
                 </span>
-                We send you a laundry bag with a QR code attached.
+                {t("We send you a laundry bag with a QR code.")}
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sand-200 text-xs font-extrabold text-sand-900">
                   2
                 </span>
-                Fill the bag with your laundry.
+                {t("Fill the bag with your laundry.")}
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sand-200 text-xs font-extrabold text-sand-900">
                   3
                 </span>
-                Scan the QR code on the bag — enter your email and your details
-                will be pre-filled. Choose your pickup time and confirm.
+                {t(
+                  "Scan the QR code on the bag \u2014 enter your email and your details will be pre-filled. Choose your pickup time and confirm.",
+                )}
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sand-200 text-xs font-extrabold text-sand-900">
                   4
                 </span>
-                Place the bag outside your door. We handle the rest.
+                {t("Place the bag outside your door. We handle the rest.")}
               </li>
             </ul>
           </div>
 
           <div className="mt-6">
             <Link href="/">
-              <ActionButton asChild>Back to home</ActionButton>
+              <ActionButton asChild>{t("Back to home")}</ActionButton>
             </Link>
           </div>
         </div>
@@ -572,22 +587,26 @@ export default function BookingPage() {
   return (
     <div className="relative overflow-x-hidden">
       <PageGlow />
-      <TopNav compact ctaHref="/" ctaLabel="Back home" />
+      <TopNav compact ctaHref="/" ctaLabel={t("Back home")} />
 
       <main className="mx-auto max-w-5xl px-4 py-14">
         <SectionHeading
-          eyebrow="Get started"
+          eyebrow={t("Get started")}
           title={
-            step === "done" ? "You're all set!" : "Start your laundry service"
+            step === "done"
+              ? t("You're all set!")
+              : t("Start your laundry service")
           }
           description={
             step === "email"
-              ? "Register in minutes — no password required. Just your email and a quick verification code."
+              ? t(
+                  "Register in minutes \u2014 no password required. Just your email and a quick verification code.",
+                )
               : step === "otp"
-                ? "Enter the 6-digit code we sent to your email."
+                ? t("Enter the 6-digit code we sent to your email.")
                 : step === "profile"
-                  ? "Just a few more details so we can deliver to you."
-                  : "Your laundry bag is on its way."
+                  ? t("Just a few more details so we can deliver to you.")
+                  : t("Your laundry bag is on its way.")
           }
           centered
         />
@@ -596,19 +615,19 @@ export default function BookingPage() {
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             <StepPill
               number="1"
-              label="Email"
+              label={t("Email")}
               active={step === "email"}
               complete={stepIndex > 0}
             />
             <StepPill
               number="2"
-              label="Verify"
+              label={t("Verify")}
               active={step === "otp"}
               complete={stepIndex > 1}
             />
             <StepPill
               number="3"
-              label="Details"
+              label={t("Details")}
               active={step === "profile"}
               complete={stepIndex > 2}
             />

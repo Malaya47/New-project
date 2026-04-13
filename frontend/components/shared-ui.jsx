@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { t } from "../lib/translations";
 
 export function formatCurrency(value) {
   return new Intl.NumberFormat("de-CH", {
@@ -14,7 +15,7 @@ export function formatCurrency(value) {
 }
 
 export function formatPickupDate(value) {
-  if (!value) return "Not selected";
+  if (!value) return t("Not selected");
   const [year, month, day] = value.split("-");
   return new Date(year, Number(month) - 1, day).toLocaleDateString("en-IN", {
     weekday: "long",
@@ -25,7 +26,7 @@ export function formatPickupDate(value) {
 }
 
 export function capitalize(value) {
-  if (!value) return "Not selected";
+  if (!value) return t("Not selected");
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
@@ -67,12 +68,12 @@ export function TopNav({
             laundry.li
           </Link>
           <nav className="hidden flex-wrap gap-5 text-sm font-semibold text-sand-700 xl:flex">
-            <Link href="/">Home</Link>
-            <Link href="/services">Services</Link>
-            <Link href="/pricing">Pricing</Link>
-            <Link href="/preparation">Preparation</Link>
-            <Link href="/how-it-works">How it works</Link>
-            <Link href="/book">Book pickup</Link>
+            <Link href="/">{t("Home")}</Link>
+            <Link href="/services">{t("Services")}</Link>
+            <Link href="/pricing">{t("Pricing")}</Link>
+            <Link href="/preparation">{t("Preparation")}</Link>
+            <Link href="/how-it-works">{t("How it works")}</Link>
+            <Link href="/book">{t("Book pickup")}</Link>
             {!compact ? <Link href="/admin">Admin</Link> : null}
           </nav>
           <div className="flex flex-wrap items-center justify-end gap-3">
@@ -97,7 +98,7 @@ export function TopNav({
                 href="/admin"
                 className="text-sm font-extrabold text-sand-700"
               >
-                Admin
+                {t("Admin")}
               </Link>
             ) : null}
             <Link
@@ -118,7 +119,7 @@ export function TopNav({
           </Link>
           <button
             type="button"
-            aria-label="Toggle menu"
+            aria-label={t("Toggle menu")}
             onClick={() => setMenuOpen((o) => !o)}
             className="text-sand-900 p-1"
           >
@@ -159,22 +160,22 @@ export function TopNav({
           <div className="pb-4 border-t border-sand-200">
             <nav className="flex flex-col gap-5 pt-4 text-base font-semibold text-sand-700">
               <Link href="/" onClick={() => setMenuOpen(false)}>
-                Home
+                {t("Home")}
               </Link>
               <Link href="/services" onClick={() => setMenuOpen(false)}>
-                Services
+                {t("Services")}
               </Link>
               <Link href="/pricing" onClick={() => setMenuOpen(false)}>
-                Pricing
+                {t("Pricing")}
               </Link>
               <Link href="/preparation" onClick={() => setMenuOpen(false)}>
-                Preparation
+                {t("Preparation")}
               </Link>
               <Link href="/how-it-works" onClick={() => setMenuOpen(false)}>
-                How it works
+                {t("How it works")}
               </Link>
               <Link href="/book" onClick={() => setMenuOpen(false)}>
-                Book pickup
+                {t("Book pickup")}
               </Link>
               {!compact ? (
                 <Link href="/admin" onClick={() => setMenuOpen(false)}>
@@ -199,8 +200,8 @@ export function TopNav({
 }
 
 export function QrCard({
-  title = "Your bag QR",
-  subtitle = "Scan this code on your bag for future pickups.",
+  title = t("Your bag QR"),
+  subtitle = t("Scan this code on your bag for future pickups."),
   bagCode,
   qrSvg,
   className = "",
@@ -211,7 +212,7 @@ export function QrCard({
     >
       <small className="block text-sand-600">{title}</small>
       <strong className="mt-2 block text-lg text-sand-900">
-        {bagCode || "Bag code pending"}
+        {bagCode || t("Bag code pending")}
       </strong>
       <p className="mt-2 text-sm leading-6 text-sand-700">{subtitle}</p>
       {qrSvg ? (
@@ -384,9 +385,9 @@ export function HeroVisual() {
           </div>
 
           <div className="mt-4 grid grid-cols-3 divide-x divide-sand-200 rounded-[1.6rem] border border-sand-200/80 bg-white/80 py-4 text-center text-sm font-semibold text-sand-700 backdrop-blur">
-            <span>Wash</span>
-            <span>Dry & Iron</span>
-            <span>Fold</span>
+            <span>{t("Wash")}</span>
+            <span>{t("Dry & Iron")}</span>
+            <span>{t("Fold")}</span>
           </div>
         </div>
       </div>
@@ -421,8 +422,9 @@ export function Footer() {
               laundry.li
             </Link>
             <p className="mt-4 text-sm leading-7 text-sand-600">
-              Premium laundry and dry cleaning delivered to your door.
-              Modernizing fabric care for the busy professional.
+              {t(
+                "Premium laundry and dry cleaning delivered to your door. Modernizing fabric care for the busy professional.",
+              )}
             </p>
             <div className="mt-5 flex gap-3">
               <a
@@ -476,27 +478,27 @@ export function Footer() {
           {/* Services */}
           <div>
             <h4 className="text-sm font-extrabold uppercase tracking-[0.2em] text-sand-900">
-              Services
+              {t("Services")}
             </h4>
             <ul className="mt-5 space-y-4 text-sm text-sand-600">
               <li>
                 <a href="#" className="transition hover:text-sand-900">
-                  Wash &amp; Fold
+                  {t("Wash & Fold")}
                 </a>
               </li>
               <li>
                 <a href="#" className="transition hover:text-sand-900">
-                  Dry Cleaning
+                  {t("Dry Cleaning")}
                 </a>
               </li>
               <li>
                 <a href="#" className="transition hover:text-sand-900">
-                  Iron &amp; Press
+                  {t("Iron & Press")}
                 </a>
               </li>
               <li>
                 <a href="#" className="transition hover:text-sand-900">
-                  Commercial Laundry
+                  {t("Commercial Laundry")}
                 </a>
               </li>
             </ul>
@@ -505,12 +507,12 @@ export function Footer() {
           {/* Company */}
           <div>
             <h4 className="text-sm font-extrabold uppercase tracking-[0.2em] text-sand-900">
-              Company
+              {t("Company")}
             </h4>
             <ul className="mt-5 space-y-4 text-sm text-sand-600">
               <li>
                 <Link href="/" className="transition hover:text-sand-900">
-                  About Us
+                  {t("About Us")}
                 </Link>
               </li>
               <li>
@@ -518,17 +520,17 @@ export function Footer() {
                   href="/how-it-works"
                   className="transition hover:text-sand-900"
                 >
-                  How it Works
+                  {t("How it Works")}
                 </Link>
               </li>
               <li>
                 <Link href="/book" className="transition hover:text-sand-900">
-                  Pricing
+                  {t("Pricing")}
                 </Link>
               </li>
               <li>
                 <a href="#" className="transition hover:text-sand-900">
-                  Careers
+                  {t("Careers")}
                 </a>
               </li>
             </ul>
@@ -537,23 +539,24 @@ export function Footer() {
           {/* Stay Updated */}
           <div>
             <h4 className="text-sm font-extrabold uppercase tracking-[0.2em] text-sand-900">
-              Stay Updated
+              {t("Stay Updated")}
             </h4>
             <p className="mt-4 text-sm leading-7 text-sand-600">
-              Subscribe to our newsletter for tips on fabric care and exclusive
-              offers.
+              {t(
+                "Subscribe to our newsletter for tips on fabric care and exclusive offers.",
+              )}
             </p>
             <div className="mt-5 space-y-3">
               <input
                 type="email"
-                placeholder="Email address"
+                placeholder={t("Email address")}
                 className="w-full rounded-[1.25rem] bg-gold-pill px-4 py-3 text-sm font-semibold text-white placeholder-white/70 outline-none"
               />
               <button
                 type="button"
                 className="w-full rounded-[1.25rem] border border-sand-200 bg-white px-4 py-3 text-sm font-extrabold text-sand-900 shadow-soft transition hover:border-sand-400"
               >
-                Subscribe
+                {t("Subscribe")}
               </button>
             </div>
           </div>
@@ -562,13 +565,13 @@ export function Footer() {
 
       <div className="border-t border-sand-200">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-sm text-sand-600">
-          <p>© 2026 laundry.li. All rights reserved.</p>
+          <p>{t("© 2026 laundry.li. All rights reserved.")}</p>
           <div className="flex gap-6">
             <a href="#" className="transition hover:text-sand-900">
-              Privacy Policy
+              {t("Privacy Policy")}
             </a>
             <a href="#" className="transition hover:text-sand-900">
-              Terms of Service
+              {t("Terms of Service")}
             </a>
           </div>
         </div>

@@ -15,13 +15,16 @@ const body = Manrope({
 
 export const metadata = {
   title: "laundry.li | Smart Laundry Pickup",
-  description: "Premium laundry pickup app with QR registration and CHF billing.",
+  description:
+    "Premium laundry pickup app with QR registration and CHF billing.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${display.variable} ${body.variable} bg-hero-wash font-body text-sand-900 antialiased`}>
+    <html lang="de">
+      <body
+        className={`${display.variable} ${body.variable} bg-hero-wash font-body text-sand-900 antialiased`}
+      >
         {children}
       </body>
     </html>

@@ -1,54 +1,59 @@
 import Image from "next/image";
 import { Footer, PageGlow, TopNav } from "./shared-ui";
+import { t } from "../lib/translations";
 
 const services = [
   {
     icon: "/images/service_icons/washing_machine.png",
     alt: "Washing machine",
-    title: "Washing",
-    description: "Thorough cleaning of your everyday clothes.",
+    title: t("Washing"),
+    description: t("Thorough cleaning of your everyday clothes."),
   },
   {
     icon: "/images/service_icons/drying.png",
     alt: "Dryer",
-    title: "Drying",
-    description: "Gentle and clean, ready for the day.",
+    title: t("Drying"),
+    description: t("Gentle and clean, ready for the day."),
   },
   {
     icon: "/images/service_icons/iron.png",
     alt: "Iron",
-    title: "Ironing",
-    description: "Neatly pressed for a well-kept result.",
+    title: t("Ironing"),
+    description: t("Neatly pressed for a well-kept result."),
   },
   {
     icon: "/images/service_icons/fold.png",
     alt: "Folded laundry",
-    title: "Folding",
-    description: "Neatly laid out and ready to put away.",
+    title: t("Folding"),
+    description: t("Neatly laid out and ready to put away."),
   },
 ];
 
 const clothingItems = [
-  { icon: "/images/clothes/shirt.png", alt: "Shirt", label: "Shirts" },
-  { icon: "/images/clothes/pant.png", alt: "Pants", label: "Pants" },
+  { icon: "/images/clothes/shirt.png", alt: "Shirt", label: t("Shirts") },
+  { icon: "/images/clothes/pant.png", alt: "Pants", label: t("Pants") },
   {
     icon: "/images/clothes/underwear.png",
     alt: "Underwear",
-    label: "Underwear",
+    label: t("Underwear"),
   },
   {
     icon: "/images/clothes/jersey.png",
     alt: "Sportswear",
-    label: "Sportswear",
+    label: t("Sportswear"),
   },
-  { icon: "/images/clothes/folding_cloth.png", alt: "Towels", label: "Towels" },
+  {
+    icon: "/images/clothes/folding_cloth.png",
+    alt: "Towels",
+    label: t("Towels"),
+  },
 ];
 
 export default function ServicesPage() {
   return (
     <div className="relative overflow-x-hidden min-h-screen bg-hero-wash">
       <PageGlow />
-      <TopNav ctaHref="/book" ctaLabel="Book now" />
+      <TopNav ctaHref="/book" ctaLabel={t("Book now")} />
 
       <main className="mx-auto max-w-2xl px-4 pb-16 pt-10">
         {/* ── Section header ───────────────────────────── */}
@@ -56,18 +61,17 @@ export default function ServicesPage() {
           <div className="mb-3 flex items-center justify-center gap-3">
             <div className="h-px w-8 bg-sand-400" />
             <span className="font-display text-xs italic font-semibold tracking-widest text-sand-500">
-              Our Service
+              {t("Our Service")}
             </span>
             <div className="h-px w-8 bg-sand-400" />
           </div>
           <h1 className="font-display text-3xl font-bold leading-tight text-sand-900 sm:text-4xl">
-            We take care of
-            <br />
-            the hard part
+            {t("We take care of the hard part")}
           </h1>
           <p className="mt-3 max-w-xs mx-auto text-sm leading-relaxed text-sand-600 sm:max-w-md sm:text-base">
-            Washing, Drying, Ironing and Folding – so your laundry comes back
-            clean and neat.
+            {t(
+              "Washing, Drying, Ironing and Folding – so your laundry comes back clean and neat.",
+            )}
           </p>
         </div>
 
@@ -114,7 +118,7 @@ export default function ServicesPage() {
         {/* ── Clothing types ───────────────────────────── */}
         <div className="mt-6 rounded-3xl border border-sand-200 bg-white/90 p-6 shadow-soft">
           <h2 className="mb-5 font-display text-center text-base font-bold text-sand-900 sm:text-lg">
-            Suitable for everyday laundry
+            {t("Suitable for everyday laundry")}
           </h2>
           {/* Row of 3 + row of 2 centered */}
           <div className="flex flex-col items-center gap-3">

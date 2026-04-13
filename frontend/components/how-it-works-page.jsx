@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { processSteps } from "../lib/site-data";
+import { t } from "../lib/translations";
+
 import {
   ActionButton,
   Footer,
@@ -17,34 +19,39 @@ const stepImages = [
   { src: "/images/laundry.png", alt: "Laundry" },
 ];
 
-// Mobile-specific step content (English, matching reference design)
+// Mobile-specific step content
 const mobileSteps = [
   {
     img: "/images/QR.png",
     alt: "QR code",
-    title: "Scan the QR code",
-    description: "Scan the code on your laundry bag directly with your phone.",
+    title: t("Scan the QR code"),
+    description: t(
+      "Scan the code on your laundry bag directly with your phone.",
+    ),
   },
   {
     img: "/images/location.png",
     alt: "Location",
-    title: "Choose a time window",
-    description:
+    title: t("Choose a time window"),
+    description: t(
       "Your address is recognised and you choose an available time slot.",
+    ),
   },
   {
     img: "/images/pick-up.png",
     alt: "Pick-up",
-    title: "Place it by the door",
-    description:
+    title: t("Place it by the door"),
+    description: t(
       "Put your bag outside in the morning for scheduled collection.",
+    ),
   },
   {
     img: "/images/laundry.png",
     alt: "Laundry",
-    title: "Receive it back clean",
-    description:
+    title: t("Receive it back clean"),
+    description: t(
       "In the evening you get your laundry back clean, ironed and folded.",
+    ),
   },
 ];
 
@@ -52,43 +59,47 @@ const services = [
   {
     icon: "/images/service_icons/washing_machine.png",
     alt: "Washing machine",
-    title: "Washing",
-    description: "Thorough cleaning of your everyday clothes.",
+    title: t("Washing"),
+    description: t("Thorough cleaning of your everyday clothes."),
   },
   {
     icon: "/images/service_icons/drying.png",
     alt: "Dryer",
-    title: "Drying",
-    description: "Gentle and clean, ready for the day.",
+    title: t("Drying"),
+    description: t("Gentle and clean, ready for the day."),
   },
   {
     icon: "/images/service_icons/iron.png",
     alt: "Iron",
-    title: "Ironing",
-    description: "Neatly pressed for a well-kept result.",
+    title: t("Ironing"),
+    description: t("Neatly pressed for a well-kept result."),
   },
   {
     icon: "/images/service_icons/fold.png",
     alt: "Folded laundry",
-    title: "Folding",
-    description: "Neatly laid out and ready to put away.",
+    title: t("Folding"),
+    description: t("Neatly laid out and ready to put away."),
   },
 ];
 
 const clothingItems = [
-  { icon: "/images/clothes/shirt.png", alt: "Shirt", label: "Shirts" },
-  { icon: "/images/clothes/pant.png", alt: "Pants", label: "Pants" },
+  { icon: "/images/clothes/shirt.png", alt: "Shirt", label: t("Shirts") },
+  { icon: "/images/clothes/pant.png", alt: "Pants", label: t("Pants") },
   {
     icon: "/images/clothes/underwear.png",
     alt: "Underwear",
-    label: "Underwear",
+    label: t("Underwear"),
   },
   {
     icon: "/images/clothes/jersey.png",
     alt: "Sportswear",
-    label: "Sportswear",
+    label: t("Sportswear"),
   },
-  { icon: "/images/clothes/folding_cloth.png", alt: "Towels", label: "Towels" },
+  {
+    icon: "/images/clothes/folding_cloth.png",
+    alt: "Towels",
+    label: t("Towels"),
+  },
 ];
 
 const rules = [
@@ -112,13 +123,13 @@ const rules = [
       </svg>
     ),
     items: [
-      "Sort light, dark and coloured separately",
-      "Normal everyday laundry only",
-      "Do not overfill the bag",
+      t("Sort light, dark and coloured separately"),
+      t("Normal everyday laundry only"),
+      t("Do not overfill the bag"),
     ],
   },
   {
-    title: "Important to know",
+    title: t("Important to know"),
     icon: (
       <svg
         width="28"
@@ -137,13 +148,13 @@ const rules = [
       </svg>
     ),
     items: [
-      "We wash as handed in",
-      "No sorting of individual items",
-      "Mixed laundry is washed together",
+      t("We wash as handed in"),
+      t("No sorting of individual items"),
+      t("Mixed laundry is washed together"),
     ],
   },
   {
-    title: "Not suitable",
+    title: t("Not suitable"),
     icon: (
       <svg
         width="28"
@@ -161,9 +172,9 @@ const rules = [
       </svg>
     ),
     items: [
-      "Silk, wool, leather",
-      "Duvets, pillows, curtains",
-      "Heavily soiled clothing",
+      t("Silk, wool, leather"),
+      t("Duvets, pillows, curtains"),
+      t("Heavily soiled clothing"),
     ],
   },
 ];
@@ -172,7 +183,7 @@ export default function HowItWorksPage() {
   return (
     <div className="relative overflow-x-hidden">
       <PageGlow />
-      <TopNav ctaHref="/book" ctaLabel="Start booking" />
+      <TopNav ctaHref="/book" ctaLabel={t("Start booking")} />
 
       {/* ─────────────────────────────────────────────────────
           MOBILE layout  (< md)  — matches reference design
@@ -183,19 +194,17 @@ export default function HowItWorksPage() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <div className="h-px w-10 bg-sand-400" />
             <span className="font-display text-xs italic font-semibold tracking-widest text-sand-500">
-              Smart Pickup System
+              {t("Smart Pickup System")}
             </span>
             <div className="h-px w-10 bg-sand-400" />
           </div>
           <h1 className="font-display text-3xl font-bold leading-tight text-sand-900">
-            Scan. Choose a time.
+            {t("Scan. Choose a time.")}
             <br />
-            Place it by the door.
+            {t("Place it by the door.")}
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-sand-600">
-            The QR code on your bag makes
-            <br />
-            ordering even easier.
+            {t("The QR code on your bag makes ordering even easier.")}
           </p>
         </div>
 
@@ -240,8 +249,9 @@ export default function HowItWorksPage() {
         {/* Bottom invoice note */}
         <div className="mt-8 border-t border-sand-200 pt-5 text-center">
           <p className="text-sm italic leading-relaxed text-sand-500">
-            End of month: You conveniently receive a<br />
-            consolidated invoice by email.
+            {t(
+              "End of month: You conveniently receive a consolidated invoice by email.",
+            )}
           </p>
 
           {/* Two benefit icons */}
@@ -255,9 +265,7 @@ export default function HowItWorksPage() {
                 className="object-contain"
               />
               <span className="text-xs font-semibold leading-tight text-sand-700">
-                No address
-                <br />
-                re-entry
+                {t("No address re-entry")}
               </span>
             </div>
             <div className="flex items-center gap-2 pl-6">
@@ -269,9 +277,7 @@ export default function HowItWorksPage() {
                 className="object-contain"
               />
               <span className="text-xs font-semibold leading-tight text-sand-700">
-                No online
-                <br />
-                payment needed
+                {t("No online payment needed")}
               </span>
             </div>
           </div>
@@ -283,18 +289,17 @@ export default function HowItWorksPage() {
             <div className="mb-3 flex items-center justify-center gap-3">
               <div className="h-px w-8 bg-sand-400" />
               <span className="font-display text-xs italic font-semibold tracking-widest text-sand-500">
-                Our Service
+                {t("Our Service")}
               </span>
               <div className="h-px w-8 bg-sand-400" />
             </div>
             <h2 className="font-display text-3xl font-bold leading-tight text-sand-900">
-              We take care of
-              <br />
-              the hard part
+              {t("We take care of the hard part")}
             </h2>
             <p className="mt-3 max-w-xs mx-auto text-sm leading-relaxed text-sand-600">
-              Washing, Drying, Ironing and Folding – so your laundry comes back
-              clean and neat.
+              {t(
+                "Washing, Drying, Ironing and Folding – so your laundry comes back clean and neat.",
+              )}
             </p>
           </div>
 
@@ -337,7 +342,7 @@ export default function HowItWorksPage() {
 
           <div className="mt-6 rounded-3xl border border-sand-200 bg-white/90 p-6 shadow-soft">
             <h2 className="mb-5 font-display text-center text-base font-bold text-sand-900">
-              Suitable for everyday laundry
+              {t("Suitable for everyday laundry")}
             </h2>
             <div className="flex flex-col items-center gap-3">
               <div className="flex flex-wrap justify-center gap-3">
@@ -386,13 +391,15 @@ export default function HowItWorksPage() {
         <section className="mt-10 border-t border-sand-200 pt-8">
           <div className="mb-6 text-center">
             <p className="mb-2 font-display text-sm font-semibold italic tracking-wide text-sand-500">
-              Prices &amp; Billing
+              {t("Prices & Billing")}
             </p>
             <h2 className="font-display text-3xl font-bold leading-tight text-sand-900">
-              Simple. Transparent. Convenient.
+              {t("Simple. Transparent. Convenient.")}
             </h2>
             <p className="mt-3 mx-auto max-w-xs text-sm leading-relaxed text-sand-600">
-              Clear prices per bag – no complicated rates or online payment.
+              {t(
+                "Clear prices per bag – no complicated rates or online payment.",
+              )}
             </p>
           </div>
 
@@ -452,7 +459,7 @@ export default function HowItWorksPage() {
                 />
               </div>
               <p className="text-center text-[11px] leading-snug text-sand-600">
-                More convenience at a better price
+                {t("More convenience at a better price")}
               </p>
             </div>
           </div>
@@ -609,22 +616,22 @@ export default function HowItWorksPage() {
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
             <p className="text-xs italic leading-relaxed text-sand-500">
-              If in doubt: just ask us quickly — we are happy to help.
+              {t("If in doubt: just ask us quickly — we are happy to help.")}
             </p>
           </div>
 
           <div className="mt-6 overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#c89761,#7a5030)] px-6 py-8 text-center shadow-glow">
             <h2 className="font-display text-2xl font-bold leading-tight text-white">
-              Ready for less effort?
+              {t("Ready for less effort?")}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-white/80">
-              Start now and leave your laundry to us.
+              {t("Start now and leave your laundry to us.")}
             </p>
             <Link
               href="/book"
               className="mt-5 inline-flex w-full max-w-xs items-center justify-center rounded-full bg-[linear-gradient(135deg,#f5e6cc,#e8c98a)] px-6 py-3.5 font-display text-base font-bold text-sand-900 shadow-soft transition hover:-translate-y-0.5"
             >
-              Book now
+              {t("Book now")}
             </Link>
           </div>
         </section>
@@ -635,9 +642,11 @@ export default function HowItWorksPage() {
       ───────────────────────────────────────────────────── */}
       <main className="hidden md:block mx-auto max-w-2xl px-4 py-14">
         <SectionHeading
-          eyebrow="Smart pickup"
-          title="Scan. Choose a time. Leave it by the door."
-          description="The process is now separate from the homepage so it stays easier to understand. This page explains the simple pickup flow in English."
+          eyebrow={t("Smart pickup")}
+          title={t("Scan. Choose a time. Leave it by the door.")}
+          description={t(
+            "The process is now separate from the homepage so it stays easier to understand. This page explains the simple pickup flow in English.",
+          )}
           centered
         />
 
@@ -746,22 +755,22 @@ export default function HowItWorksPage() {
 
         <div className="mt-10 rounded-[2rem] border border-sand-200 bg-white/85 p-8 shadow-soft">
           <h3 className="font-display text-4xl leading-none">
-            Why customers like this flow
+            {t("Why customers like this flow")}
           </h3>
           <div className="mt-5 flex flex-wrap gap-3 text-sm font-semibold text-sand-700">
             <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
-              No address re-entry every time
+              {t("No address re-entry every time")}
             </span>
             <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
-              No online payment at pickup
+              {t("No online payment at pickup")}
             </span>
             <span className="rounded-full border border-sand-200 bg-sand-50 px-4 py-3">
-              Clear monthly invoicing
+              {t("Clear monthly invoicing")}
             </span>
           </div>
           <div className="mt-8">
             <Link href="/book">
-              <ActionButton asChild>Continue to booking</ActionButton>
+              <ActionButton asChild>{t("Continue to booking")}</ActionButton>
             </Link>
           </div>
         </div>
@@ -769,8 +778,9 @@ export default function HowItWorksPage() {
         {/* Bottom invoice note + benefit icons */}
         <div className="mt-8 border-t border-sand-200 pt-5 text-center">
           <p className="text-sm italic leading-relaxed text-sand-500">
-            End of month: You conveniently receive a consolidated invoice by
-            email.
+            {t(
+              "End of month: You conveniently receive a consolidated invoice by email.",
+            )}
           </p>
           <div className="mt-5 flex items-center justify-center divide-x divide-sand-200">
             <div className="flex items-center gap-2 pr-6">
@@ -782,9 +792,7 @@ export default function HowItWorksPage() {
                 className="object-contain"
               />
               <span className="text-xs font-semibold leading-tight text-sand-700">
-                No address
-                <br />
-                re-entry
+                {t("No address re-entry")}
               </span>
             </div>
             <div className="flex items-center gap-2 pl-6">
@@ -796,9 +804,7 @@ export default function HowItWorksPage() {
                 className="object-contain"
               />
               <span className="text-xs font-semibold leading-tight text-sand-700">
-                No online
-                <br />
-                payment needed
+                {t("No online payment needed")}
               </span>
             </div>
           </div>
