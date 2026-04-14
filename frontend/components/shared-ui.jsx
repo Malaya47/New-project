@@ -74,7 +74,7 @@ export function TopNav({
             <Link href="/preparation">{t("Preparation")}</Link>
             <Link href="/how-it-works">{t("How it works")}</Link>
             <Link href="/book">{t("Book pickup")}</Link>
-            {!compact ? <Link href="/admin">Admin</Link> : null}
+            {/* {!compact ? <Link href="/admin">Admin</Link> : null} */}
           </nav>
           <div className="flex flex-wrap items-center justify-end gap-3">
             {userName ? (
